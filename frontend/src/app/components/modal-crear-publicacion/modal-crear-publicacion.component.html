@@ -1,0 +1,92 @@
+<!-- src/app/components/modal-crear-publicacion/modal-crear-publicacion.component.html -->
+<div class="modal-overlay" (click)="cerrarModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Crear Publicación</h2>
+      <button class="btn-cerrar" (click)="cerrarModal()" [disabled]="enviando">
+        <span>&times;</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div *ngIf="error" class="alert alert-error">
+        {{ error }}
+      </div>
+
+      <div class="form-group">
+        <label for="titulo">Título *</label>
+        <input
+          type="text"
+          id="titulo"
+          [(ngModel)]="titulo"
+          placeholder="Escribe un título..."
+          [disabled]="enviando"
+          maxlength="100"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="mensaje">Mensaje *</label>
+        <textarea
+          id="mensaje"
+          [(ngModel)]="mensaje"
+          placeholder="¿Qué estás pensando?"
+          rows="5"
+          [disabled]="enviando"
+          maxlength="500"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Imagen (opcional)</label>
+        <div class="imagen-upload">
+          <input
+            type="file"
+            id="imagen"
+            accept="image/jpeg,image/jpg,image/png,image/gif"
+            (change)="onImagenSeleccionada($event)"
+            [disabled]="enviando"
+            #fileInput
+          />
+          <button
+            type="button"
+            class="btn-seleccionar-imagen"
+            (click)="fileInput.click()"
+            [disabled]="enviando"
+          >
+            📷 Seleccionar Imagen
+          </button>
+        </div>
+
+        <div *ngIf="previsualizacionImagen" class="preview-container">
+          <img [src]="previsualizacionImagen" alt="Previsualización" />
+          <button
+            type="button"
+            class="btn-eliminar-imagen"
+            (click)="eliminarImagen()"
+            [disabled]="enviando"
+          >
+            &times;
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        class="btn btn-secondary"
+        (click)="cerrarModal()"
+        [disabled]="enviando"
+      >
+        Cancelar
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="crear()"
+        [disabled]="enviando || !titulo.trim() || !mensaje.trim()"
+      >
+        {{ enviando ? 'Publicando...' : 'Publicar' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -6,7 +6,7 @@ import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  
+
   // Habilitar CORS
   app.enableCors({
     origin: 'http://localhost:4200', // Tu frontend Angular
@@ -14,11 +14,13 @@ async function bootstrap() {
   });
 
   // Validación global
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   // Servir archivos estáticos (imágenes subidas)
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {

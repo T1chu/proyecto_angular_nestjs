@@ -1,5 +1,15 @@
 // src/auth/auth.controller.ts
-import { Controller, Post, Body, UploadedFile, UseInterceptors, BadRequestException, UnauthorizedException, HttpCode, Headers } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
+  UnauthorizedException,
+  HttpCode,
+  Headers,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -12,22 +22,28 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('registro')
-  @UseInterceptors(FileInterceptor('imagenPerfil', {
-    storage: diskStorage({
-      destination: './uploads/perfiles',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = extname(file.originalname);
-        cb(null, `perfil-${uniqueSuffix}${ext}`);
+  @UseInterceptors(
+    FileInterceptor('imagenPerfil', {
+      storage: diskStorage({
+        destination: './uploads/perfiles',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          cb(null, `perfil-${uniqueSuffix}${ext}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+          return cb(
+            new BadRequestException('Solo se permiten imágenes'),
+            false,
+          );
+        }
+        cb(null, true);
       },
     }),
-    fileFilter: (req, file, cb) => {
-      if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-        return cb(new BadRequestException('Solo se permiten imágenes'), false);
-      }
-      cb(null, true);
-    },
-  }))
+  )
   async registro(
     @Body() registerDto: RegisterDto,
     @UploadedFile() file: Express.Multer.File,
