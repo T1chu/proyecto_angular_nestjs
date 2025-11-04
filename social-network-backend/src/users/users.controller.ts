@@ -26,4 +26,3 @@ export class UsersController {
     return this.usersService.obtenerPerfil(id);
   }
 }
-

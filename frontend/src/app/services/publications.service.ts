@@ -1,22 +1,26 @@
-// src/app/services/publications.service.ts
+// frontend/src/app/services/publications.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
 export interface Publicacion {
   _id: string;
-  descripcion: string;
-  fechaPublicacion: Date;
-  usuarioId: string;
-  megusta: string[];
-  archivo?: string;
+  titulo: string;
+  mensaje: string;
+  imagen?: string;
+  usuario: any;
+  meGusta: string[];
+  activo: boolean;
+  createdAt: Date;
 }
 
-export interface CreatePublicacionDto {
-  descripcion: string;
-  archivo?: File;
+export interface ListarPublicacionesResponse {
+  publicaciones: Publicacion[];
+  total: number;
+  offset: number;
+  limit: number;
 }
 
 @Injectable({
@@ -37,32 +41,47 @@ export class PublicationsService {
     });
   }
 
-  crear(formData: FormData): Observable<Publicacion> {
-    return this.http.post<Publicacion>(`${this.apiUrl}/crear`, formData, {
-      headers: this.getHeaders()
+  crear(formData: FormData): Promise<Publicacion> {
+    return new Promise((resolve, reject) => {
+      this.http.post<Publicacion>(this.apiUrl, formData, {
+        headers: this.getHeaders()
+      }).subscribe({
+        next: resolve,
+        error: reject
+      });
     });
   }
 
-  listar(): Observable<Publicacion[]> {
-    return this.http.get<Publicacion[]>(`${this.apiUrl}/listar`, {
-      headers: this.getHeaders()
+  listar(
+    ordenamiento: string = 'fecha',
+    offset: number = 0,
+    limit: number = 10
+  ): Observable<ListarPublicacionesResponse> {
+    let params = new HttpParams()
+      .set('ordenamiento', ordenamiento)
+      .set('offset', offset.toString())
+      .set('limit', limit.toString());
+
+    return this.http.get<ListarPublicacionesResponse>(this.apiUrl, {
+      headers: this.getHeaders(),
+      params: params
     });
   }
 
-  eliminar(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}/eliminar`, {
+  eliminar(id: string): Observable<{ mensaje: string }> {
+    return this.http.delete<{ mensaje: string }>(`${this.apiUrl}/${id}`, {
       headers: this.getHeaders()
     });
   }
 
   darMeGusta(id: string): Observable<Publicacion> {
-    return this.http.post<Publicacion>(`${this.apiUrl}/${id}/me-gusta`, {}, {
+    return this.http.post<Publicacion>(`${this.apiUrl}/${id}/megusta`, {}, {
       headers: this.getHeaders()
     });
   }
 
   quitarMeGusta(id: string): Observable<Publicacion> {
-    return this.http.delete<Publicacion>(`${this.apiUrl}/${id}/me-gusta`, {
+    return this.http.delete<Publicacion>(`${this.apiUrl}/${id}/megusta`, {
       headers: this.getHeaders()
     });
   }
