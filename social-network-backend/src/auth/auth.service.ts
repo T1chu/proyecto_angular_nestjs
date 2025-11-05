@@ -51,7 +51,7 @@ export class AuthService {
       correo,
       nombreUsuario,
       contrasena: hashedPassword,
-      imagenPerfil: file ? `/uploads/perfiles/${file.filename}` : null,
+      imagenPerfil: file ? `http://localhost:3000/uploads/perfiles/${file.filename}` : null,
     });
 
     await nuevoUsuario.save();
@@ -98,7 +98,6 @@ export class AuthService {
 
     // Generar tokens
     const payload: JwtPayload = {
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       sub: String(usuario._id),
       nombreUsuario: usuario.nombreUsuario,
       perfil: usuario.perfil,
@@ -111,13 +110,16 @@ export class AuthService {
       accessToken,
       refreshToken,
       usuario: {
-        id: usuario._id,
+        _id: String(usuario._id),
         nombre: usuario.nombre,
         apellido: usuario.apellido,
         nombreUsuario: usuario.nombreUsuario,
         correo: usuario.correo,
+        fechaNacimiento: usuario.fechaNacimiento,
+        descripcion: usuario.descripcion,
         imagenPerfil: usuario.imagenPerfil,
         perfil: usuario.perfil,
+        activo: usuario.activo,
       },
     };
   }

@@ -36,7 +36,7 @@ export class UsersService {
 
   async actualizarPerfil(
     id: string,
-    datos: { nombre: string; apellido: string; descripcion: string }
+    datos: { nombre: string; apellido: string; descripcion: string },
   ) {
     const usuario = await this.userModel.findById(id);
 
@@ -66,22 +66,28 @@ export class UsersService {
 
     // Eliminar imagen anterior si existe
     if (usuario.imagenPerfil) {
-      const imagenAnterior = path.join(
-        __dirname,
-        '..',
-        '..',
-        usuario.imagenPerfil,
-      );
-      if (fs.existsSync(imagenAnterior)) {
-        try {
-          fs.unlinkSync(imagenAnterior);
-        } catch (error) {
-          console.error('Error al eliminar imagen anterior:', error);
+      // Extraer el nombre del archivo de la URL completa
+      const nombreArchivo = usuario.imagenPerfil.split('/').pop();
+      if (nombreArchivo) {
+        const imagenAnterior = path.join(
+          __dirname,
+          '..',
+          '..',
+          'uploads',
+          'perfiles',
+          nombreArchivo,
+        );
+        if (fs.existsSync(imagenAnterior)) {
+          try {
+            fs.unlinkSync(imagenAnterior);
+          } catch (error) {
+            console.error('Error al eliminar imagen anterior:', error);
+          }
         }
       }
     }
 
-    usuario.imagenPerfil = `/uploads/perfiles/${file.filename}`;
+    usuario.imagenPerfil = `http://localhost:3000/uploads/perfiles/${file.filename}`;
     await usuario.save();
 
     return {

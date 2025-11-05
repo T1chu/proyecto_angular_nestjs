@@ -24,7 +24,7 @@ export class PublicationsService {
   ) {
     const nuevaPublicacion = new this.publicationModel({
       ...createPublicationDto,
-      imagen: file ? `/uploads/publicaciones/${file.filename}` : null,
+      imagen: file ? `http://localhost:3000/uploads/publicaciones/${file.filename}` : null,
       usuario: usuarioId,
     });
 
