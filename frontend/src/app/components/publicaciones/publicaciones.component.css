@@ -1,17 +1,31 @@
-/* frontend/src/app/components/publicaciones/publicaciones.component.css */
-
 .publicaciones-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #8b0000 100%);
   padding-bottom: 2rem;
+  position: relative;
+}
+
+.publicaciones-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(220, 20, 60, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(220, 20, 60, 0.05) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .publicaciones-header {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: rgba(26, 26, 26, 0.95);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  border-bottom: 2px solid rgba(220, 20, 60, 0.3);
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(10px);
 }
 
 .header-content {
@@ -25,8 +39,12 @@
 
 .header-content h1 {
   margin: 0;
-  color: #333;
+  color: #fff;
   font-size: 1.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
 }
 
 .header-actions {
@@ -43,61 +61,81 @@
   border: none;
   border-radius: 25px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .btn-crear {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #dc143c 0%, #b01030 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
 }
 
 .btn-crear:hover {
+  background: linear-gradient(135deg, #ff1744 0%, #dc143c 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 6px 20px rgba(220, 20, 60, 0.6);
 }
 
 .btn-perfil {
-  background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
+  background: rgba(220, 20, 60, 0.1);
+  color: #dc143c;
+  border: 2px solid #dc143c;
 }
 
 .btn-perfil:hover {
-  background: #667eea;
+  background: #dc143c;
   color: white;
+  box-shadow: 0 0 15px rgba(220, 20, 60, 0.6);
 }
 
 .publicaciones-filtros {
   max-width: 800px;
   margin: 2rem auto 1rem;
   padding: 0 1rem;
+  position: relative;
+  z-index: 1;
 }
 
 .filtro-item {
-  background: white;
-  padding: 1rem;
+  background: rgba(26, 26, 26, 0.95);
+  padding: 1rem 1.5rem;
   border-radius: 10px;
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(220, 20, 60, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .filtro-item label {
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: #dc143c;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
 }
 
 .filtro-item select {
   flex: 1;
   padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  border: 2px solid #333;
+  border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
+  background: rgba(10, 10, 10, 0.8);
+  color: #fff;
+  transition: all 0.3s;
+}
+
+.filtro-item select:focus {
+  outline: none;
+  border-color: #dc143c;
+  box-shadow: 0 0 15px rgba(220, 20, 60, 0.4);
 }
 
 .loading-container {
@@ -105,14 +143,16 @@
   margin: 3rem auto;
   text-align: center;
   color: white;
+  position: relative;
+  z-index: 1;
 }
 
 .spinner {
   width: 50px;
   height: 50px;
   margin: 0 auto 1rem;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  border: 4px solid rgba(220, 20, 60, 0.2);
+  border-top-color: #dc143c;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -125,60 +165,74 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 0 1rem;
+  position: relative;
+  z-index: 1;
 }
 
 .sin-publicaciones {
-  background: white;
+  background: rgba(26, 26, 26, 0.95);
   padding: 3rem;
-  border-radius: 10px;
+  border-radius: 15px;
   text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(220, 20, 60, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .sin-publicaciones-icon {
   font-size: 4rem;
   margin-bottom: 1rem;
+  filter: grayscale(1) brightness(0.5);
 }
 
 .sin-publicaciones h3 {
   margin: 0 0 0.5rem 0;
-  color: #333;
+  color: #fff;
+  font-size: 1.5rem;
 }
 
 .sin-publicaciones p {
   margin: 0 0 1.5rem 0;
-  color: #666;
+  color: #b0b0b0;
 }
 
 .btn-crear-primera {
   padding: 0.75rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #dc143c 0%, #b01030 100%);
   color: white;
   border: none;
   border-radius: 25px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
 }
 
 .btn-crear-primera:hover {
+  background: linear-gradient(135deg, #ff1744 0%, #dc143c 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(220, 20, 60, 0.6);
 }
 
 .publicacion-card {
-  background: white;
-  border-radius: 10px;
+  background: rgba(26, 26, 26, 0.95);
+  border-radius: 15px;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(220, 20, 60, 0.3);
   overflow: hidden;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
 }
 
 .publicacion-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9),
+              0 0 30px rgba(220, 20, 60, 0.3);
+  border-color: rgba(220, 20, 60, 0.6);
 }
 
 .publicacion-header {
@@ -186,7 +240,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 1.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(220, 20, 60, 0.2);
 }
 
 .usuario-info {
@@ -200,6 +254,8 @@
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid #dc143c;
+  box-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
 }
 
 .usuario-datos {
@@ -208,20 +264,22 @@
 
 .usuario-datos h4 {
   margin: 0 0 0.25rem 0;
-  color: #333;
+  color: #fff;
   font-size: 1rem;
+  font-weight: 700;
 }
 
 .usuario-handle {
   display: block;
-  color: #667eea;
+  color: #dc143c;
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
+  font-weight: 600;
 }
 
 .publicacion-fecha {
   display: block;
-  color: #999;
+  color: #888;
   font-size: 0.75rem;
 }
 
@@ -232,11 +290,13 @@
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   border-radius: 5px;
-  transition: background 0.3s;
+  transition: all 0.3s;
+  color: #888;
 }
 
 .btn-eliminar:hover {
-  background: #fee;
+  background: rgba(220, 20, 60, 0.2);
+  color: #dc143c;
 }
 
 .publicacion-contenido {
@@ -245,14 +305,14 @@
 
 .publicacion-titulo {
   margin: 0 0 0.75rem 0;
-  color: #333;
-  font-size: 1.25rem;
-  font-weight: 600;
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 700;
 }
 
 .publicacion-mensaje {
   margin: 0 0 1rem 0;
-  color: #555;
+  color: #b0b0b0;
   line-height: 1.6;
   white-space: pre-wrap;
 }
@@ -261,6 +321,7 @@
   margin-top: 1rem;
   border-radius: 8px;
   overflow: hidden;
+  border: 1px solid rgba(220, 20, 60, 0.2);
 }
 
 .publicacion-imagen img {
@@ -271,9 +332,10 @@
 
 .publicacion-footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid rgba(220, 20, 60, 0.2);
   display: flex;
   gap: 1rem;
+  background: rgba(10, 10, 10, 0.4);
 }
 
 .btn-megusta {
@@ -281,24 +343,27 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: none;
-  border: 1px solid #ddd;
+  background: rgba(220, 20, 60, 0.1);
+  border: 2px solid rgba(220, 20, 60, 0.3);
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.3s;
   font-size: 0.9rem;
-  color: #666;
+  color: #b0b0b0;
+  font-weight: 600;
 }
 
 .btn-megusta:hover {
-  background: #f8f8f8;
-  border-color: #667eea;
+  background: rgba(220, 20, 60, 0.2);
+  border-color: #dc143c;
+  transform: scale(1.05);
 }
 
 .btn-megusta.activo {
-  background: #fee;
-  border-color: #e74c3c;
-  color: #e74c3c;
+  background: linear-gradient(135deg, #dc143c 0%, #b01030 100%);
+  border-color: #dc143c;
+  color: white;
+  box-shadow: 0 0 15px rgba(220, 20, 60, 0.6);
 }
 
 .btn-megusta .icon {
@@ -306,7 +371,7 @@
 }
 
 .btn-megusta .contador {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .paginacion {
@@ -316,37 +381,48 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
-  padding: 1rem;
+  background: rgba(26, 26, 26, 0.95);
+  padding: 1rem 1.5rem;
   border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(220, 20, 60, 0.3);
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(10px);
 }
 
 .btn-paginacion {
   padding: 0.5rem 1rem;
-  background: #667eea;
+  background: linear-gradient(135deg, #dc143c 0%, #b01030 100%);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
 }
 
 .btn-paginacion:hover:not(:disabled) {
-  background: #5568d3;
+  background: linear-gradient(135deg, #ff1744 0%, #dc143c 100%);
+  box-shadow: 0 0 15px rgba(220, 20, 60, 0.6);
+  transform: translateY(-2px);
 }
 
 .btn-paginacion:disabled {
-  background: #ccc;
+  background: #333;
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .paginacion-info {
-  color: #666;
+  color: #b0b0b0;
   font-size: 0.9rem;
+  font-weight: 600;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;

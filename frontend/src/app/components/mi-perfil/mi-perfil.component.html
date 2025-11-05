@@ -1,19 +1,44 @@
-<!-- frontend/src/app/components/mi-perfil/mi-perfil.component.html -->
 <div class="perfil-container" *ngIf="usuario">
   <div class="perfil-card">
     <div class="perfil-header">
+      <button class="btn-atras" (click)="volverPublicaciones()" title="Volver a publicaciones">
+        <span class="arrow-icon">←</span>
+        <span class="text">Volver</span>
+      </button>
+      
       <div class="perfil-avatar">
         <img 
           [src]="usuario.imagenPerfil || '/assets/default-avatar.png'" 
           [alt]="usuario.nombre"
           class="avatar-img"
+          [class.loading]="cargando"
         >
+        <div *ngIf="cargando" class="loading-overlay">
+          <div class="spinner-upload"></div>
+        </div>
+        <label 
+          *ngIf="editando"
+          class="btn-cambiar-foto" 
+          [class.disabled]="cargando"
+          title="Cambiar foto de perfil"
+        >
+          <input 
+            type="file" 
+            accept="image/jpeg,image/jpg,image/png,image/gif"
+            (change)="cambiarFotoPerfil($event)"
+            [disabled]="cargando"
+            #fileInput
+          >
+          <span class="camera-icon">📷</span>
+        </label>
       </div>
-      <div class="perfil-info">
+      
+      <div class="perfil-info" *ngIf="!editando">
         <h2>{{ usuario.nombre }} {{ usuario.apellido }}</h2>
         <p class="usuario-handle">@{{ usuario.nombreUsuario }}</p>
         <p class="usuario-email">{{ usuario.correo }}</p>
       </div>
+      
       <div class="perfil-acciones">
         <button 
           (click)="toggleEdicion()" 
@@ -26,13 +51,18 @@
     </div>
 
     <div class="perfil-content">
+      <!-- Mensaje de éxito -->
+      <div *ngIf="mensajeExito" class="mensaje-exito">
+        {{ mensajeExito }}
+      </div>
+
       <div *ngIf="!editando" class="perfil-vista">
         <div class="campo">
           <label>Descripción:</label>
           <p>{{ usuario.descripcion || 'Sin descripción' }}</p>
         </div>
         <div class="campo">
-          <label>Fecha de registro:</label>
+          <label>Fecha de Nacimiento:</label>
           <p>{{ usuario.fechaNacimiento | date:'dd/MM/yyyy' }}</p>
         </div>
         <div class="campo">

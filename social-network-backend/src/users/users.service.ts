@@ -1,9 +1,10 @@
-// src/users/users.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserDocument } from './schemas/user.schema';
 import { PublicationDocument } from '../publications/schemas/publication.schema';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class UsersService {
@@ -30,6 +31,61 @@ export class UsersService {
     return {
       usuario,
       publicaciones,
+    };
+  }
+
+  async actualizarPerfil(
+    id: string,
+    datos: { nombre: string; apellido: string; descripcion: string }
+  ) {
+    const usuario = await this.userModel.findById(id);
+
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    usuario.nombre = datos.nombre;
+    usuario.apellido = datos.apellido;
+    usuario.descripcion = datos.descripcion;
+
+    await usuario.save();
+
+    return {
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      descripcion: usuario.descripcion,
+    };
+  }
+
+  async actualizarImagenPerfil(id: string, file: Express.Multer.File) {
+    const usuario = await this.userModel.findById(id);
+
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    // Eliminar imagen anterior si existe
+    if (usuario.imagenPerfil) {
+      const imagenAnterior = path.join(
+        __dirname,
+        '..',
+        '..',
+        usuario.imagenPerfil,
+      );
+      if (fs.existsSync(imagenAnterior)) {
+        try {
+          fs.unlinkSync(imagenAnterior);
+        } catch (error) {
+          console.error('Error al eliminar imagen anterior:', error);
+        }
+      }
+    }
+
+    usuario.imagenPerfil = `/uploads/perfiles/${file.filename}`;
+    await usuario.save();
+
+    return {
+      imagenPerfil: usuario.imagenPerfil,
     };
   }
 }
