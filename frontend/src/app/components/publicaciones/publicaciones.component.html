@@ -1,0 +1,132 @@
+<!-- frontend/src/app/components/publicaciones/publicaciones.component.html -->
+<div class="publicaciones-container">
+  <!-- Header con botón crear publicación -->
+  <header class="publicaciones-header">
+    <div class="header-content">
+      <h1>Publicaciones</h1>
+      <div class="header-actions">
+        <button class="btn-crear" (click)="abrirModalCrear()">
+          <span class="icon">✏️</span>
+          Nueva Publicación
+        </button>
+        <button class="btn-perfil" (click)="irAPerfil()">
+          <span class="icon">👤</span>
+          Mi Perfil
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filtros y ordenamiento -->
+  <div class="publicaciones-filtros">
+    <div class="filtro-item">
+      <label for="ordenamiento">Ordenar por:</label>
+      <select 
+        id="ordenamiento" 
+        [(ngModel)]="ordenamiento" 
+        (change)="cargarPublicaciones()"
+      >
+        <option value="fecha">Más recientes</option>
+        <option value="megusta">Más populares</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando publicaciones...</p>
+  </div>
+
+  <!-- Lista de publicaciones -->
+  <div *ngIf="!loading" class="publicaciones-lista">
+    <div *ngIf="publicaciones.length === 0" class="sin-publicaciones">
+      <div class="sin-publicaciones-icon">📝</div>
+      <h3>No hay publicaciones aún</h3>
+      <p>Sé el primero en compartir algo</p>
+      <button class="btn-crear-primera" (click)="abrirModalCrear()">
+        Crear la primera publicación
+      </button>
+    </div>
+
+    <div 
+      *ngFor="let pub of publicaciones" 
+      class="publicacion-card"
+    >
+      <!-- Header de la publicación -->
+      <div class="publicacion-header">
+        <div class="usuario-info">
+          <img 
+            [src]="pub.usuario?.imagenPerfil || '/assets/default-avatar.png'" 
+            [alt]="pub.usuario?.nombre"
+            class="usuario-avatar"
+          >
+          <div class="usuario-datos">
+            <h4>{{ pub.usuario?.nombre }} {{ pub.usuario?.apellido }}</h4>
+            <span class="usuario-handle">@{{ pub.usuario?.nombreUsuario }}</span>
+            <span class="publicacion-fecha">{{ pub.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+        <button 
+          *ngIf="puedeEliminar(pub)" 
+          class="btn-eliminar"
+          (click)="eliminarPublicacion(pub._id)"
+          title="Eliminar publicación"
+        >
+          🗑️
+        </button>
+      </div>
+
+      <!-- Contenido de la publicación -->
+      <div class="publicacion-contenido">
+        <h3 class="publicacion-titulo">{{ pub.titulo }}</h3>
+        <p class="publicacion-mensaje">{{ pub.mensaje }}</p>
+        
+        <div *ngIf="pub.imagen" class="publicacion-imagen">
+          <img [src]="pub.imagen" [alt]="pub.titulo">
+        </div>
+      </div>
+
+      <!-- Footer con acciones -->
+      <div class="publicacion-footer">
+        <button 
+          class="btn-megusta"
+          [class.activo]="yaDioMeGusta(pub)"
+          (click)="toggleMeGusta(pub)"
+        >
+          <span class="icon">{{ yaDioMeGusta(pub) ? '❤️' : '🤍' }}</span>
+          <span class="contador">{{ pub.meGusta?.length || 0 }}</span>
+          <span class="texto">Me gusta</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paginación -->
+  <div *ngIf="!loading && publicaciones.length > 0" class="paginacion">
+    <button 
+      class="btn-paginacion"
+      [disabled]="offset === 0"
+      (click)="paginaAnterior()"
+    >
+      ← Anterior
+    </button>
+    <span class="paginacion-info">
+      Mostrando {{ offset + 1 }} - {{ Math.min(offset + limit, total) }} de {{ total }}
+    </span>
+    <button 
+      class="btn-paginacion"
+      [disabled]="offset + limit >= total"
+      (click)="paginaSiguiente()"
+    >
+      Siguiente →
+    </button>
+  </div>
+</div>
+
+<!-- Modal para crear publicación -->
+<app-modal-crear-publicacion
+  *ngIf="mostrarModal"
+  (cerrar)="cerrarModal()"
+  (publicacionCreada)="onPublicacionCreada()"
+></app-modal-crear-publicacion>
