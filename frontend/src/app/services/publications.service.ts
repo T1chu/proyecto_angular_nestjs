@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -56,7 +57,7 @@ export class PublicationsService {
     ordenamiento: string = 'fecha',
     offset: number = 0,
     limit: number = 10
-  ): Observable<ListarPublicacionesResponse> {
+  ): Observable<Publicacion[]> {
     let params = new HttpParams()
       .set('ordenamiento', ordenamiento)
       .set('offset', offset.toString())
@@ -65,7 +66,20 @@ export class PublicationsService {
     return this.http.get<ListarPublicacionesResponse>(this.apiUrl, {
       headers: this.getHeaders(),
       params: params
-    });
+    }).pipe(
+      map(response => {
+        // Si la respuesta tiene la estructura {publicaciones: [...], total: ...}
+        if (response && response.publicaciones) {
+          return response.publicaciones;
+        }
+        // Si la respuesta es directamente un array
+        if (Array.isArray(response)) {
+          return response;
+        }
+        // Si es otro tipo de objeto, devolver array vacío
+        return [];
+      })
+    );
   }
 
   eliminar(id: string): Observable<{ mensaje: string }> {

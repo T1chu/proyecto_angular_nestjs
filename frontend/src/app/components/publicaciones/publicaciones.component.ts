@@ -68,14 +68,23 @@ export class PublicacionesComponent implements OnInit {
 
   cargarPublicaciones(): void {
     this.loading = true;
-    this.publicationsService.listar().subscribe({
-      next: (publicaciones: any) => {
-        this.publicaciones = publicaciones || [];
-        this.total = publicaciones.length || 0;
+    this.publicationsService.listar(this.ordenamiento, this.offset, this.limit).subscribe({
+      next: (publicaciones) => {
+        // Asegurarse de que publicaciones sea un array
+        if (Array.isArray(publicaciones)) {
+          this.publicaciones = publicaciones;
+          this.total = publicaciones.length;
+        } else {
+          console.error('La respuesta no es un array:', publicaciones);
+          this.publicaciones = [];
+          this.total = 0;
+        }
         this.loading = false;
       },
       error: (err) => {
         console.error('Error cargando publicaciones:', err);
+        this.publicaciones = [];
+        this.total = 0;
         this.loading = false;
         
         // Si el error es de autenticación, redirigir al login
