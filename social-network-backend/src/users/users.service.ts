@@ -63,6 +63,7 @@ export class UsersService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
+    // Eliminar imagen anterior si existe
     if (usuario.imagenPerfil) {
       const nombreArchivo = usuario.imagenPerfil.split('/').pop();
       if (nombreArchivo) {

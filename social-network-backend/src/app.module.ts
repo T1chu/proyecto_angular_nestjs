@@ -18,9 +18,14 @@ import { PublicationsModule } from './publications/publications.module';
     MongooseModule.forRoot(
       process.env.MONGODB_URI || 'mongodb://localhost:27017/redsocial',
     ),
+    // Configuración correcta para servir archivos estáticos
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
+      serveStaticOptions: {
+        index: false,
+        redirect: false,
+      },
     }),
     MulterModule.register({
       dest: './uploads',

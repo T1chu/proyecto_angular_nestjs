@@ -129,7 +129,7 @@ export class AuthService {
       return {
         valido: true,
         usuario: {
-          id: usuario._id,
+          id: String(usuario._id),
           nombreUsuario: usuario.nombreUsuario,
           perfil: usuario.perfil,
         },

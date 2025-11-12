@@ -92,10 +92,17 @@ export class PublicationsService {
       throw new NotFoundException('Publicación no encontrada');
     }
 
-    if (
-      publicacion.usuario.toString() !== usuarioId &&
-      perfil !== 'administrador'
-    ) {
+    // Convertir ambos IDs a string para comparación
+    const publicacionUsuarioId = String(publicacion.usuario);
+    const solicitanteId = String(usuarioId);
+
+    console.log('🔍 Verificando permisos:');
+    console.log('Usuario de la publicación:', publicacionUsuarioId);
+    console.log('Usuario solicitante:', solicitanteId);
+    console.log('Perfil del solicitante:', perfil);
+
+    // Verificar si es el creador o es administrador
+    if (publicacionUsuarioId !== solicitanteId && perfil !== 'administrador') {
       throw new ForbiddenException(
         'No tienes permiso para eliminar esta publicación',
       );
@@ -118,7 +125,7 @@ export class PublicationsService {
       throw new BadRequestException('Publicación no disponible');
     }
 
-    if (publicacion.meGusta.some((uid) => uid.toString() === usuarioId)) {
+    if (publicacion.meGusta.some((uid) => String(uid) === String(usuarioId))) {
       throw new BadRequestException('Ya le diste me gusta a esta publicación');
     }
 
@@ -136,7 +143,7 @@ export class PublicationsService {
     }
 
     const index = publicacion.meGusta.findIndex(
-      (uid) => uid.toString() === usuarioId,
+      (uid) => String(uid) === String(usuarioId),
     );
     
     if (index === -1) {

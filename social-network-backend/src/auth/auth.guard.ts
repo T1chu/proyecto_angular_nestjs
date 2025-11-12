@@ -38,19 +38,15 @@ export class AuthGuard implements CanActivate {
 
     const resultado = await this.authService.autorizar(token);
 
-    // Normalizar la estructura que el resto del backend espera (req.user.sub, req.user.perfil)
+    // IMPORTANTE: Normalizar la estructura que el backend espera
     req.user = {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      sub: resultado.usuario?.id as string,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      sub: String(resultado.usuario?.id), // Convertir a string explícitamente
       perfil: resultado.usuario?.perfil as string,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       nombreUsuario: resultado.usuario?.nombreUsuario as string,
     };
+
+    console.log('✅ Usuario autenticado:', req.user);
 
     return true;
   }
 }
-
-
-
