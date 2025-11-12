@@ -30,28 +30,24 @@ export class AuthService {
   ): Promise<{ mensaje: string; usuario: any }> {
     const { correo, nombreUsuario, contrasena, ...resto } = registerDto;
 
-    // Verificar si el correo ya existe
     const correoExiste = await this.userModel.findOne({ correo });
     if (correoExiste) {
       throw new ConflictException('El correo ya está registrado');
     }
 
-    // Verificar si el nombre de usuario ya existe
     const usuarioExiste = await this.userModel.findOne({ nombreUsuario });
     if (usuarioExiste) {
       throw new ConflictException('El nombre de usuario ya está en uso');
     }
 
-    // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(contrasena, 10);
 
-    // Crear usuario
     const nuevoUsuario = new this.userModel({
       ...resto,
       correo,
       nombreUsuario,
       contrasena: hashedPassword,
-      imagenPerfil: file ? `http://localhost:3000/uploads/perfiles/${file.filename}` : null,
+      imagenPerfil: file ? `/uploads/perfiles/${file.filename}` : null,
     });
 
     await nuevoUsuario.save();
@@ -74,7 +70,6 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string; usuario: any }> {
     const { usuarioOCorreo, contrasena } = loginDto;
 
-    // Buscar usuario por correo o nombre de usuario
     const usuario = await this.userModel.findOne({
       $or: [{ correo: usuarioOCorreo }, { nombreUsuario: usuarioOCorreo }],
     });
@@ -87,7 +82,6 @@ export class AuthService {
       throw new UnauthorizedException('Usuario inactivo');
     }
 
-    // Verificar contraseña
     const contrasenaValida = await bcrypt.compare(
       contrasena,
       usuario.contrasena,
@@ -96,7 +90,6 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // Generar tokens
     const payload: JwtPayload = {
       sub: String(usuario._id),
       nombreUsuario: usuario.nombreUsuario,

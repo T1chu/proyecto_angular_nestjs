@@ -24,7 +24,7 @@ export class PublicationsService {
   ) {
     const nuevaPublicacion = new this.publicationModel({
       ...createPublicationDto,
-      imagen: file ? `http://localhost:3000/uploads/publicaciones/${file.filename}` : null,
+      imagen: file ? `/uploads/publicaciones/${file.filename}` : null,
       usuario: usuarioId,
     });
 
@@ -44,10 +44,9 @@ export class PublicationsService {
       filtro.usuario = usuario;
     }
 
-    const sort: Record<string, 1 | -1> = { createdAt: -1 }; // Por defecto ordenar por fecha descendente
+    const sort: Record<string, 1 | -1> = { createdAt: -1 };
 
     if (ordenamiento === 'megusta') {
-      // Ordenar por cantidad de me gusta
       const publicaciones = await this.publicationModel
         .find(filtro)
         .populate('usuario', '-contrasena')
@@ -55,7 +54,6 @@ export class PublicationsService {
         .limit(limit)
         .lean();
 
-      // Ordenar manualmente por cantidad de me gusta
       publicaciones.sort(
         (a, b) => (b.meGusta?.length || 0) - (a.meGusta?.length || 0),
       );
@@ -94,7 +92,6 @@ export class PublicationsService {
       throw new NotFoundException('Publicación no encontrada');
     }
 
-    // Solo el creador o un administrador pueden eliminar
     if (
       publicacion.usuario.toString() !== usuarioId &&
       perfil !== 'administrador'
@@ -121,12 +118,10 @@ export class PublicationsService {
       throw new BadRequestException('Publicación no disponible');
     }
 
-    // Verificar si ya le dio me gusta
     if (publicacion.meGusta.some((uid) => uid.toString() === usuarioId)) {
       throw new BadRequestException('Ya le diste me gusta a esta publicación');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     publicacion.meGusta.push(usuarioId as any);
     await publicacion.save();
 
@@ -140,14 +135,13 @@ export class PublicationsService {
       throw new NotFoundException('Publicación no encontrada');
     }
 
-    // Verificar si había dado me gusta
     const index = publicacion.meGusta.findIndex(
       (uid) => uid.toString() === usuarioId,
     );
+    
     if (index === -1) {
-      throw new BadRequestException(
-        'No le habías dado me gusta a esta publicación',
-      );
+      // Si no había dado me gusta, devolver la publicación sin error
+      return await publicacion.populate('usuario', '-contrasena');
     }
 
     publicacion.meGusta.splice(index, 1);

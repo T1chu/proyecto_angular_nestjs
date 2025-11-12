@@ -21,7 +21,6 @@ export class UsersService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    // Obtener las últimas 3 publicaciones del usuario
     const publicaciones = await this.publicationModel
       .find({ usuario: id, activo: true })
       .sort({ createdAt: -1 })
@@ -64,9 +63,7 @@ export class UsersService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    // Eliminar imagen anterior si existe
     if (usuario.imagenPerfil) {
-      // Extraer el nombre del archivo de la URL completa
       const nombreArchivo = usuario.imagenPerfil.split('/').pop();
       if (nombreArchivo) {
         const imagenAnterior = path.join(
@@ -87,7 +84,7 @@ export class UsersService {
       }
     }
 
-    usuario.imagenPerfil = `http://localhost:3000/uploads/perfiles/${file.filename}`;
+    usuario.imagenPerfil = `/uploads/perfiles/${file.filename}`;
     await usuario.save();
 
     return {

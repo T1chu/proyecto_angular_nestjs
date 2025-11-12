@@ -69,6 +69,30 @@
           <label>Perfil:</label>
           <p>{{ usuario.perfil }}</p>
         </div>
+
+        <!-- Últimas 3 publicaciones -->
+        <div class="ultimas-publicaciones" *ngIf="publicaciones.length > 0">
+          <h3>Mis últimas publicaciones</h3>
+          <div class="publicaciones-grid">
+            <div *ngFor="let pub of publicaciones" class="mini-publicacion">
+              <div class="mini-pub-header">
+                <h4>{{ pub.titulo }}</h4>
+                <span class="mini-pub-fecha">{{ pub.createdAt | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <p class="mini-pub-mensaje">{{ pub.mensaje }}</p>
+              <div *ngIf="pub.imagen" class="mini-pub-imagen">
+                <img [src]="pub.imagen" [alt]="pub.titulo">
+              </div>
+              <div class="mini-pub-stats">
+                <span>❤️ {{ pub.meGusta?.length || 0 }} me gusta</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="publicaciones.length === 0" class="sin-publicaciones-mensaje">
+          <p>📝 Aún no has creado ninguna publicación</p>
+        </div>
       </div>
 
       <div *ngIf="editando" class="perfil-edicion">

@@ -6,6 +6,17 @@ import { AuthService, Usuario } from '../../services/auth.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
+interface Publicacion {
+  _id: string;
+  titulo: string;
+  mensaje: string;
+  imagen?: string;
+  usuario: any;
+  meGusta: string[];
+  activo: boolean;
+  createdAt: Date;
+}
+
 @Component({
   selector: 'app-mi-perfil',
   standalone: true,
@@ -15,6 +26,7 @@ import { environment } from '../../../environments/environment';
 })
 export class MiPerfilComponent implements OnInit {
   usuario: Usuario | null = null;
+  publicaciones: Publicacion[] = [];
   editando: boolean = false;
   cargando: boolean = false;
   error: string = '';
@@ -38,10 +50,32 @@ export class MiPerfilComponent implements OnInit {
         this.nombre = usuario.nombre;
         this.apellido = usuario.apellido || '';
         this.descripcion = usuario.descripcion || '';
+        this.cargarPublicaciones();
       } else {
         this.router.navigate(['/login']);
       }
     });
+  }
+
+  cargarPublicaciones() {
+    if (!this.usuario) return;
+
+    const token = this.authService.getToken();
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    this.http.get<any>(`${environment.apiUrl}/usuarios/perfil`, { headers })
+      .subscribe({
+        next: (response) => {
+          if (response.publicaciones) {
+            this.publicaciones = response.publicaciones;
+          }
+        },
+        error: (error) => {
+          console.error('Error al cargar publicaciones:', error);
+        }
+      });
   }
 
   async cambiarFotoPerfil(event: Event): Promise<void> {
@@ -86,7 +120,6 @@ export class MiPerfilComponent implements OnInit {
 
       if (response && this.usuario) {
         this.usuario.imagenPerfil = response.imagenPerfil;
-        // Mostrar mensaje de éxito temporal
         this.mensajeExito = '✓ Foto de perfil actualizada correctamente';
         setTimeout(() => this.mensajeExito = '', 3000);
         this.error = '';
@@ -103,7 +136,6 @@ export class MiPerfilComponent implements OnInit {
 
   toggleEdicion() {
     if (this.editando) {
-      // Cancelar edición, restaurar valores originales
       if (this.usuario) {
         this.nombre = this.usuario.nombre;
         this.apellido = this.usuario.apellido || '';
@@ -158,6 +190,10 @@ export class MiPerfilComponent implements OnInit {
         this.cargando = false;
       }
     });
+  }
+
+  volverPublicaciones() {
+    this.router.navigate(['/publicaciones']);
   }
 
   cerrarSesion() {
