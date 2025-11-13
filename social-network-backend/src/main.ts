@@ -30,7 +30,7 @@ async function bootstrap() {
   console.log('📁 Ruta de uploads:', uploadsPath);
   console.log('📁 Carpeta perfiles existe:', existsSync(perfilesPath));
   console.log('📁 Carpeta publicaciones existe:', existsSync(publicacionesPath));
-  
+
   // Mostrar archivos existentes
   try {
     const perfilesFiles = readdirSync(perfilesPath);

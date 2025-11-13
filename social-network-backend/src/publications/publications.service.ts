@@ -145,7 +145,7 @@ export class PublicationsService {
     const index = publicacion.meGusta.findIndex(
       (uid) => String(uid) === String(usuarioId),
     );
-    
+
     if (index === -1) {
       // Si no había dado me gusta, devolver la publicación sin error
       return await publicacion.populate('usuario', '-contrasena');
