@@ -49,14 +49,9 @@
       </button>
     </div>
 
-        <div 
+    <div 
       *ngFor="let pub of publicaciones" 
       class="publicacion-card"
-      (click)="verDetalle(pub._id)"
-      style="cursor: pointer;"
-    >
-      <!-- contenido existente -->
-    </div>
     >
       <!-- Header de la publicación -->
       <div class="publicacion-header">
@@ -75,7 +70,7 @@
         <button 
           *ngIf="puedeEliminar(pub)" 
           class="btn-eliminar"
-          (click)="eliminarPublicacion(pub._id)"
+          (click)="eliminarPublicacion(pub._id); $event.stopPropagation()"
           title="Eliminar publicación"
         >
           🗑️
@@ -83,7 +78,7 @@
       </div>
 
       <!-- Contenido de la publicación -->
-      <div class="publicacion-contenido">
+      <div class="publicacion-contenido" (click)="verDetalle(pub._id)">
         <h3 class="publicacion-titulo">{{ pub.titulo }}</h3>
         <p class="publicacion-mensaje">{{ pub.mensaje }}</p>
         
@@ -97,7 +92,7 @@
         <button 
           class="btn-megusta"
           [class.activo]="yaDioMeGusta(pub)"
-          (click)="toggleMeGusta(pub)"
+          (click)="toggleMeGusta(pub); $event.stopPropagation()"
         >
           <span class="icon">{{ yaDioMeGusta(pub) ? '❤️' : '🤍' }}</span>
           <span class="contador">{{ pub.meGusta?.length || 0 }}</span>
@@ -127,6 +122,7 @@
       Siguiente →
     </button>
   </div>
+</div>
 
 <!-- Modal para crear publicación -->
 <app-modal-crear-publicacion

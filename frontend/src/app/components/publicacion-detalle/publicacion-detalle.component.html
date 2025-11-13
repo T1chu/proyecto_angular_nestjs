@@ -104,13 +104,24 @@
               </span>
             </div>
             
-            <button 
-              *ngIf="puedeEditarComentario(comentario)"
-              class="btn-editar-comentario"
-              (click)="iniciarEdicion(comentario)"
-            >
-              ✏️
-            </button>
+            <div class="comentario-acciones">
+              <button 
+                *ngIf="puedeEditarComentario(comentario)"
+                class="btn-editar-comentario"
+                (click)="iniciarEdicion(comentario)"
+                title="Editar comentario"
+              >
+                ✏️
+              </button>
+              <button 
+                *ngIf="puedeEditarComentario(comentario)"
+                class="btn-eliminar-comentario"
+                (click)="eliminarComentario(comentario._id)"
+                title="Eliminar comentario"
+              >
+                🗑️
+              </button>
+            </div>
           </div>
 
           <!-- Modo edición -->

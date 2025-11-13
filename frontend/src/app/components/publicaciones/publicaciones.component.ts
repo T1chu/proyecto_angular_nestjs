@@ -1,128 +1,192 @@
-// frontend/src/app/services/publications.service.ts
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
-import { AuthService } from './auth.service';
+// frontend/src/app/components/publicaciones/publicaciones.component.ts
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { PublicationsService, Publicacion } from '../../services/publications.service';
+import { AuthService } from '../../services/auth.service';
+import { ModalCrearPublicacionComponent } from '../modal-crear-publicacion/modal-crear-publicacion.component';
 
-export interface Publicacion {
-  _id: string;
-  titulo: string;
-  mensaje: string;
-  imagen?: string;
-  usuario: any;
-  meGusta: string[];
-  activo: boolean;
-  createdAt: Date;
-}
-
-export interface ListarPublicacionesResponse {
-  publicaciones: Publicacion[];
-  total: number;
-  offset: number;
-  limit: number;
-}
-
-export interface ComentariosResponse {
-  comentarios: any[];
-  total: number;
-  offset: number;
-  limit: number;
-}
-
-@Injectable({
-  providedIn: 'root'
+@Component({
+  selector: 'app-publicaciones',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ModalCrearPublicacionComponent],
+  templateUrl: './publicaciones.component.html',
+  styleUrls: ['./publicaciones.component.css']
 })
-export class PublicationsService {
-  private apiUrl = `${environment.apiUrl}/publicaciones`;
+export class PublicacionesComponent implements OnInit {
+  publicaciones: Publicacion[] = [];
+  loading: boolean = true;
+  mostrarModal: boolean = false;
+  ordenamiento: string = 'fecha';
+  offset: number = 0;
+  limit: number = 10;
+  total: number = 0;
+  Math = Math;
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
-
-  private getHeaders(): HttpHeaders {
-    const token = this.authService.getToken();
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
+  constructor(
+    private publicationsService: PublicationsService,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    // Inicializar el servicio de autenticación
+    this.authService.inicializar();
   }
 
-  crear(formData: FormData): Promise<Publicacion> {
-    return new Promise((resolve, reject) => {
-      this.http.post<Publicacion>(this.apiUrl, formData, {
-        headers: this.getHeaders()
-      }).subscribe({
-        next: resolve,
-        error: reject
-      });
-    });
+  ngOnInit(): void {
+    this.cargarPublicaciones();
   }
 
-  obtenerPorId(id: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`, {
-      headers: this.getHeaders()
+  cargarPublicaciones(): void {
+    this.loading = true;
+    console.log('🔄 Cargando publicaciones...', { 
+      ordenamiento: this.ordenamiento, 
+      offset: this.offset, 
+      limit: this.limit 
     });
-  }
-
-  listar(ordenamiento: string = 'fecha', offset: number = 0, limit: number = 10): Observable<Publicacion[]> {
-    let params = new HttpParams()
-      .set('ordenamiento', ordenamiento)
-      .set('offset', offset.toString())
-      .set('limit', limit.toString());
-
-    return this.http.get<ListarPublicacionesResponse>(this.apiUrl, {
-      headers: this.getHeaders(),
-      params: params
-    }).pipe(
-      map(response => {
+    
+    this.publicationsService.listar(this.ordenamiento, this.offset, this.limit).subscribe({
+      next: (response: any) => {
+        console.log('✅ Respuesta del servidor:', response);
+        
+        // Manejar diferentes formatos de respuesta
         if (response && response.publicaciones) {
-          return response.publicaciones;
+          this.publicaciones = response.publicaciones || [];
+          this.total = response.total || 0;
+        } else if (Array.isArray(response)) {
+          this.publicaciones = response;
+          this.total = response.length;
+        } else {
+          console.error('❌ Formato de respuesta inesperado:', response);
+          this.publicaciones = [];
+          this.total = 0;
         }
-        if (Array.isArray(response)) {
-          return response;
+        
+        this.loading = false;
+        console.log('📊 Publicaciones cargadas:', this.publicaciones.length);
+      },
+      error: (error: any) => {
+        console.error('❌ Error al cargar publicaciones:', error);
+        console.error('📋 Detalles del error:', {
+          status: error.status,
+          message: error.message,
+          error: error.error
+        });
+        
+        alert('Error al cargar publicaciones: ' + (error.error?.message || error.message || 'Error desconocido'));
+        this.loading = false;
+        this.publicaciones = [];
+      }
+    });
+  }
+
+  abrirModalCrear(): void {
+    this.mostrarModal = true;
+  }
+
+  cerrarModal(): void {
+    this.mostrarModal = false;
+  }
+
+  onPublicacionCreada(): void {
+    this.offset = 0;
+    this.cargarPublicaciones();
+  }
+
+  verDetalle(id: string): void {
+    this.router.navigate(['/publicaciones', id]);
+  }
+
+  irAPerfil(): void {
+    this.router.navigate(['/mi-perfil']);
+  }
+
+  puedeEliminar(publicacion: Publicacion): boolean {
+    const usuarioActual = this.authService.getUsuarioActual();
+    if (!usuarioActual || !publicacion || !publicacion.usuario) {
+      return false;
+    }
+    return usuarioActual._id === publicacion.usuario._id;
+  }
+
+  eliminarPublicacion(id: string): void {
+    if (!confirm('¿Estás seguro de que deseas eliminar esta publicación?')) {
+      return;
+    }
+
+    this.publicationsService.eliminar(id).subscribe({
+      next: () => {
+        console.log('✅ Publicación eliminada');
+        this.cargarPublicaciones();
+      },
+      error: (error: any) => {
+        console.error('❌ Error al eliminar publicación:', error);
+        alert('Error al eliminar la publicación');
+      }
+    });
+  }
+
+  yaDioMeGusta(publicacion: Publicacion): boolean {
+    const usuarioActual = this.authService.getUsuarioActual();
+    if (!usuarioActual || !publicacion || !publicacion.meGusta) {
+      return false;
+    }
+    return publicacion.meGusta.includes(usuarioActual._id);
+  }
+
+  toggleMeGusta(publicacion: Publicacion): void {
+    if (!publicacion) return;
+    
+    if (this.yaDioMeGusta(publicacion)) {
+      this.quitarMeGusta(publicacion);
+    } else {
+      this.darMeGusta(publicacion);
+    }
+  }
+
+  darMeGusta(publicacion: Publicacion): void {
+    if (!publicacion || !publicacion._id) return;
+    
+    this.publicationsService.darMeGusta(publicacion._id).subscribe({
+      next: (pubActualizada: Publicacion) => {
+        const index = this.publicaciones.findIndex(p => p._id === publicacion._id);
+        if (index !== -1 && pubActualizada && pubActualizada.meGusta) {
+          this.publicaciones[index].meGusta = pubActualizada.meGusta;
         }
-        return [];
-      })
-    );
-  }
-
-  eliminar(id: string): Observable<{ mensaje: string }> {
-    return this.http.delete<{ mensaje: string }>(`${this.apiUrl}/${id}`, {
-      headers: this.getHeaders()
+      },
+      error: (error: any) => {
+        console.error('❌ Error al dar me gusta:', error);
+      }
     });
   }
 
-  darMeGusta(id: string): Observable<Publicacion> {
-    return this.http.post<Publicacion>(`${this.apiUrl}/${id}/megusta`, {}, {
-      headers: this.getHeaders()
+  quitarMeGusta(publicacion: Publicacion): void {
+    if (!publicacion || !publicacion._id) return;
+    
+    this.publicationsService.quitarMeGusta(publicacion._id).subscribe({
+      next: (pubActualizada: Publicacion) => {
+        const index = this.publicaciones.findIndex(p => p._id === publicacion._id);
+        if (index !== -1 && pubActualizada && pubActualizada.meGusta) {
+          this.publicaciones[index].meGusta = pubActualizada.meGusta;
+        }
+      },
+      error: (error: any) => {
+        console.error('❌ Error al quitar me gusta:', error);
+      }
     });
   }
 
-  quitarMeGusta(id: string): Observable<Publicacion> {
-    return this.http.delete<Publicacion>(`${this.apiUrl}/${id}/megusta`, {
-      headers: this.getHeaders()
-    });
+  paginaAnterior(): void {
+    if (this.offset > 0) {
+      this.offset -= this.limit;
+      this.cargarPublicaciones();
+    }
   }
 
-  obtenerComentarios(publicacionId: string, offset: number, limit: number): Observable<ComentariosResponse> {
-    let params = new HttpParams()
-      .set('offset', offset.toString())
-      .set('limit', limit.toString());
-
-    return this.http.get<ComentariosResponse>(`${this.apiUrl}/${publicacionId}/comentarios`, {
-      headers: this.getHeaders(),
-      params: params
-    });
-  }
-
-  crearComentario(publicacionId: string, datos: { mensaje: string }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${publicacionId}/comentarios`, datos, {
-      headers: this.getHeaders()
-    });
-  }
-
-  modificarComentario(publicacionId: string, comentarioId: string, datos: { mensaje: string }): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${publicacionId}/comentarios/${comentarioId}`, datos, {
-      headers: this.getHeaders()
-    });
+  paginaSiguiente(): void {
+    if (this.offset + this.limit < this.total) {
+      this.offset += this.limit;
+      this.cargarPublicaciones();
+    }
   }
 }

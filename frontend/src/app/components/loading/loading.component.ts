@@ -110,7 +110,10 @@ import { AuthService } from '../../services/auth.service';
   `]
 })
 export class LoadingComponent implements OnInit {
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router) {
+    // Inicializar el servicio de autenticación
+    this.authService.inicializar();
+  }
 
   ngOnInit(): void {
     this.validarSesion();

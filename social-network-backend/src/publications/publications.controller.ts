@@ -1,4 +1,4 @@
-// src/publications/publications.controller.ts
+// social-network-backend/src/publications/publications.controller.ts
 import {
   Controller,
   Get,
@@ -125,5 +125,15 @@ export class PublicationsController {
     @Req() req: RequestWithUser,
   ) {
     return this.publicationsService.modificarComentario(comentarioId, updateCommentDto, req.user.sub);
+  }
+
+  @Delete(':id/comentarios/:comentarioId')
+  @HttpCode(200)
+  async eliminarComentario(
+    @Param('id') id: string,
+    @Param('comentarioId') comentarioId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.publicationsService.eliminarComentario(comentarioId, req.user.sub, req.user.perfil);
   }
 }

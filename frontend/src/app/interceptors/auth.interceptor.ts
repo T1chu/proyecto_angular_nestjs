@@ -1,18 +1,19 @@
+// frontend/src/app/interceptors/auth.interceptor.ts
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
-import { AuthService } from '../services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
-  const authService = inject(AuthService);
 
   return next(req).pipe(
     catchError((error) => {
       if (error.status === 401) {
         // Token expirado o inválido
-        authService.logout();
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('loginTime');
         router.navigate(['/login']);
       }
       return throwError(() => error);

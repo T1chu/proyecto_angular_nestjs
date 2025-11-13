@@ -31,11 +31,7 @@ export interface RegistroResponse {
 
 export interface ValidarTokenResponse {
   valido: boolean;
-  usuario?: {
-    id: string;
-    nombreUsuario: string;
-    perfil: string;
-  };
+  usuario?: Usuario;
 }
 
 @Injectable({
@@ -45,9 +41,18 @@ export class AuthService {
   private apiUrl = environment.apiUrl;
   private usuarioActual = new BehaviorSubject<Usuario | null>(null);
   public usuario$ = this.usuarioActual.asObservable();
+  private inicializado = false;
 
   constructor(private http: HttpClient) {
-    this.cargarUsuarioDesdeToken();
+    // No llamar a cargarUsuarioDesdeToken aquí para evitar dependencia circular
+  }
+
+  // Método público para inicializar el servicio
+  inicializar(): void {
+    if (!this.inicializado) {
+      this.inicializado = true;
+      this.cargarUsuarioDesdeToken();
+    }
   }
 
   registro(formData: FormData): Observable<RegistroResponse> {

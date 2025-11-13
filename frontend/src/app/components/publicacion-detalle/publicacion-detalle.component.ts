@@ -183,6 +183,27 @@ export class PublicacionDetalleComponent implements OnInit {
     return comentario.usuario._id === this.usuarioActualId;
   }
 
+  eliminarComentario(comentarioId: string): void {
+    if (!confirm('¿Estás seguro de que deseas eliminar este comentario?')) {
+      return;
+    }
+
+    this.publicationsService.eliminarComentario(this.publicacionId, comentarioId).subscribe({
+      next: () => {
+        // Eliminar el comentario de la lista local
+        const index = this.comentarios.findIndex(c => c._id === comentarioId);
+        if (index !== -1) {
+          this.comentarios.splice(index, 1);
+          this.totalComentarios--;
+        }
+      },
+      error: (err: any) => {
+        console.error('Error eliminando comentario:', err);
+        alert(err.error?.message || 'Error al eliminar el comentario');
+      }
+    });
+  }
+
   yaDioMeGusta(): boolean {
     if (!this.usuarioActualId || !this.publicacion) {
       return false;
