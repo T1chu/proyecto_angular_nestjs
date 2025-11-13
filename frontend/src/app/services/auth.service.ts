@@ -1,7 +1,7 @@
 // frontend/src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, firstValueFrom } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
@@ -29,6 +29,15 @@ export interface RegistroResponse {
   usuario: Usuario;
 }
 
+export interface ValidarTokenResponse {
+  valido: boolean;
+  usuario?: {
+    id: string;
+    nombreUsuario: string;
+    perfil: string;
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -53,6 +62,7 @@ export class AuthService {
       tap(response => {
         localStorage.setItem('token', response.accessToken);
         localStorage.setItem('refreshToken', response.refreshToken);
+        localStorage.setItem('loginTime', Date.now().toString());
         this.usuarioActual.next(response.usuario);
       })
     );
@@ -61,6 +71,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('loginTime');
     this.usuarioActual.next(null);
   }
 
@@ -72,6 +83,11 @@ export class AuthService {
     return localStorage.getItem('refreshToken');
   }
 
+  getLoginTime(): number | null {
+    const time = localStorage.getItem('loginTime');
+    return time ? parseInt(time, 10) : null;
+  }
+
   isAuthenticated(): boolean {
     return !!this.getToken();
   }
@@ -80,13 +96,29 @@ export class AuthService {
     return this.usuarioActual.value;
   }
 
+  async validarToken(token: string): Promise<ValidarTokenResponse> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<ValidarTokenResponse>(`${this.apiUrl}/auth/autorizar`, {}, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      );
+      return response;
+    } catch (error) {
+      console.error('Error al validar token:', error);
+      return { valido: false };
+    }
+  }
+
   private async cargarUsuarioDesdeToken(): Promise<void> {
     const token = this.getToken();
     if (token) {
       try {
-        const response = await this.http.post<any>(`${this.apiUrl}/auth/autorizar`, {}, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }).toPromise();
+        const response = await firstValueFrom(
+          this.http.post<any>(`${this.apiUrl}/auth/autorizar`, {}, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+        );
         
         if (response?.usuario) {
           this.usuarioActual.next(response.usuario);
@@ -98,26 +130,32 @@ export class AuthService {
     }
   }
 
-  async refrescarToken(): Promise<void> {
+  async refrescarToken(): Promise<boolean> {
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) {
       this.logout();
-      return;
+      return false;
     }
 
     try {
-      const response = await this.http.post<AuthResponse>(`${this.apiUrl}/auth/refrescar`, {}, {
-        headers: { 'Authorization': `Bearer ${refreshToken}` }
-      }).toPromise();
+      const response = await firstValueFrom(
+        this.http.post<AuthResponse>(`${this.apiUrl}/auth/refrescar`, {}, {
+          headers: { 'Authorization': `Bearer ${refreshToken}` }
+        })
+      );
 
       if (response) {
         localStorage.setItem('token', response.accessToken);
         localStorage.setItem('refreshToken', response.refreshToken);
+        localStorage.setItem('loginTime', Date.now().toString());
         this.usuarioActual.next(response.usuario);
+        return true;
       }
+      return false;
     } catch (error) {
       console.error('Error al refrescar token:', error);
       this.logout();
+      return false;
     }
   }
 }

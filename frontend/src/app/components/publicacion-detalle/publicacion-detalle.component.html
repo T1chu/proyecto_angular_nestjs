@@ -1,0 +1,156 @@
+<div class="publicacion-detalle-container">
+  <!-- Header -->
+  <div class="detalle-header">
+    <button class="btn-volver" (click)="volver()">
+      ← Volver
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="cargandoPublicacion" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando publicación...</p>
+  </div>
+
+  <!-- Publicación -->
+  <div *ngIf="!cargandoPublicacion && publicacion" class="publicacion-detalle-card">
+    <div class="pub-header">
+      <div class="usuario-info">
+        <img 
+          [src]="publicacion.usuario?.imagenPerfil || '/assets/default-avatar.png'"
+          [alt]="publicacion.usuario?.nombre"
+          class="usuario-avatar"
+        />
+        <div class="usuario-datos">
+          <h4>{{ publicacion.usuario?.nombre }} {{ publicacion.usuario?.apellido }}</h4>
+          <span class="usuario-handle">@{{ publicacion.usuario?.nombreUsuario }}</span>
+          <span class="pub-fecha">{{ publicacion.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pub-contenido">
+      <h1 class="pub-titulo">{{ publicacion.titulo }}</h1>
+      <p class="pub-mensaje">{{ publicacion.mensaje }}</p>
+      
+      <div *ngIf="publicacion.imagen" class="pub-imagen">
+        <img [src]="publicacion.imagen" [alt]="publicacion.titulo" />
+      </div>
+    </div>
+
+    <div class="pub-stats">
+      <button 
+        class="btn-megusta"
+        [class.activo]="yaDioMeGusta()"
+        (click)="toggleMeGusta()"
+      >
+        <span class="icon">{{ yaDioMeGusta() ? '❤️' : '🤍' }}</span>
+        <span class="contador">{{ publicacion.meGusta?.length || 0 }}</span>
+      </button>
+      <span class="comentarios-count">
+        💬 {{ totalComentarios }} Comentarios
+      </span>
+    </div>
+  </div>
+
+  <!-- Comentarios -->
+  <div *ngIf="!cargandoPublicacion && publicacion" class="comentarios-section">
+    <h2 class="comentarios-titulo">Comentarios ({{ totalComentarios }})</h2>
+
+    <!-- Formulario nuevo comentario -->
+    <div class="nuevo-comentario-form">
+      <textarea
+        [(ngModel)]="nuevoComentario"
+        placeholder="Escribe un comentario..."
+        rows="3"
+        maxlength="500"
+        [disabled]="enviandoComentario"
+      ></textarea>
+      <div class="form-actions">
+        <span class="contador">{{ nuevoComentario.length }}/500</span>
+        <button 
+          class="btn btn-primary"
+          (click)="enviarComentario()"
+          [disabled]="!nuevoComentario.trim() || enviandoComentario"
+        >
+          {{ enviandoComentario ? 'Enviando...' : 'Comentar' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista de comentarios -->
+    <div class="comentarios-lista">
+      <div *ngFor="let comentario of comentarios" class="comentario-item">
+        <img 
+          [src]="comentario.usuario.imagenPerfil || '/assets/default-avatar.png'"
+          [alt]="comentario.usuario.nombre"
+          class="comentario-avatar"
+        />
+        
+        <div class="comentario-contenido">
+          <div class="comentario-header">
+            <div>
+              <span class="comentario-autor">
+                {{ comentario.usuario.nombre }} {{ comentario.usuario.apellido }}
+              </span>
+              <span class="comentario-usuario">
+                @{{ comentario.usuario.nombreUsuario }}
+              </span>
+              <span class="comentario-fecha">
+                {{ comentario.createdAt | date:'dd/MM/yyyy' }}
+              </span>
+              <span *ngIf="comentario.modificado" class="comentario-editado">
+                (editado)
+              </span>
+            </div>
+            
+            <button 
+              *ngIf="puedeEditarComentario(comentario)"
+              class="btn-editar-comentario"
+              (click)="iniciarEdicion(comentario)"
+            >
+              ✏️
+            </button>
+          </div>
+
+          <!-- Modo edición -->
+          <div *ngIf="editandoComentarioId === comentario._id" class="editar-comentario">
+            <textarea
+              [(ngModel)]="textoEditado"
+              rows="3"
+              maxlength="500"
+            ></textarea>
+            <div class="editar-actions">
+              <button class="btn btn-secondary" (click)="cancelarEdicion()">
+                Cancelar
+              </button>
+              <button 
+                class="btn btn-primary"
+                (click)="guardarEdicion(comentario._id)"
+                [disabled]="!textoEditado.trim()"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+
+          <!-- Modo vista -->
+          <p *ngIf="editandoComentarioId !== comentario._id" class="comentario-mensaje">
+            {{ comentario.mensaje }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cargar más -->
+    <div *ngIf="hayMasComentarios" class="cargar-mas-container">
+      <button 
+        class="btn btn-cargar-mas"
+        (click)="cargarMasComentarios()"
+        [disabled]="cargandoComentarios"
+      >
+        {{ cargandoComentarios ? 'Cargando...' : 'Cargar más comentarios' }}
+      </button>
+    </div>
+  </div>
+</div>

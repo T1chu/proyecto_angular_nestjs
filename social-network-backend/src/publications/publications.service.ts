@@ -8,20 +8,19 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, FilterQuery } from 'mongoose';
 import { PublicationDocument } from './schemas/publication.schema';
+import { CommentDocument } from './schemas/comment.schema';
 import { CreatePublicationDto } from './dto/create-publication.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Injectable()
 export class PublicationsService {
   constructor(
-    @InjectModel('Publication')
-    private publicationModel: Model<PublicationDocument>,
+    @InjectModel('Publication') private publicationModel: Model<PublicationDocument>,
+    @InjectModel('Comment') private commentModel: Model<CommentDocument>,
   ) {}
 
-  async crear(
-    createPublicationDto: CreatePublicationDto,
-    file: Express.Multer.File,
-    usuarioId: string,
-  ) {
+  async crear(createPublicationDto: CreatePublicationDto, file: Express.Multer.File, usuarioId: string) {
     const nuevaPublicacion = new this.publicationModel({
       ...createPublicationDto,
       imagen: file ? `/uploads/publicaciones/${file.filename}` : null,
@@ -32,12 +31,22 @@ export class PublicationsService {
     return await publicacion.populate('usuario', '-contrasena');
   }
 
-  async listar(
-    ordenamiento: string,
-    usuario: string,
-    offset: number,
-    limit: number,
-  ) {
+  async obtenerPorId(id: string) {
+    const publicacion = await this.publicationModel.findById(id).populate('usuario', '-contrasena');
+
+    if (!publicacion) {
+      throw new NotFoundException('Publicación no encontrada');
+    }
+
+    const totalComentarios = await this.commentModel.countDocuments({ publicacion: id });
+
+    return {
+      ...publicacion.toObject(),
+      totalComentarios,
+    };
+  }
+
+  async listar(ordenamiento: string, usuario: string, offset: number, limit: number) {
     const filtro: FilterQuery<PublicationDocument> = { activo: true };
 
     if (usuario) {
@@ -54,9 +63,7 @@ export class PublicationsService {
         .limit(limit)
         .lean();
 
-      publicaciones.sort(
-        (a, b) => (b.meGusta?.length || 0) - (a.meGusta?.length || 0),
-      );
+      publicaciones.sort((a, b) => (b.meGusta?.length || 0) - (a.meGusta?.length || 0));
 
       const total = await this.publicationModel.countDocuments(filtro);
 
@@ -92,20 +99,11 @@ export class PublicationsService {
       throw new NotFoundException('Publicación no encontrada');
     }
 
-    // Convertir ambos IDs a string para comparación
     const publicacionUsuarioId = String(publicacion.usuario);
     const solicitanteId = String(usuarioId);
 
-    console.log('🔍 Verificando permisos:');
-    console.log('Usuario de la publicación:', publicacionUsuarioId);
-    console.log('Usuario solicitante:', solicitanteId);
-    console.log('Perfil del solicitante:', perfil);
-
-    // Verificar si es el creador o es administrador
     if (publicacionUsuarioId !== solicitanteId && perfil !== 'administrador') {
-      throw new ForbiddenException(
-        'No tienes permiso para eliminar esta publicación',
-      );
+      throw new ForbiddenException('No tienes permiso para eliminar esta publicación');
     }
 
     publicacion.activo = false;
@@ -142,12 +140,9 @@ export class PublicationsService {
       throw new NotFoundException('Publicación no encontrada');
     }
 
-    const index = publicacion.meGusta.findIndex(
-      (uid) => String(uid) === String(usuarioId),
-    );
+    const index = publicacion.meGusta.findIndex((uid) => String(uid) === String(usuarioId));
 
     if (index === -1) {
-      // Si no había dado me gusta, devolver la publicación sin error
       return await publicacion.populate('usuario', '-contrasena');
     }
 
@@ -155,5 +150,66 @@ export class PublicationsService {
     await publicacion.save();
 
     return await publicacion.populate('usuario', '-contrasena');
+  }
+
+  async obtenerComentarios(id: string, offset: number, limit: number) {
+    const publicacion = await this.publicationModel.findById(id);
+    if (!publicacion) {
+      throw new NotFoundException('Publicación no encontrada');
+    }
+
+    const comentarios = await this.commentModel
+      .find({ publicacion: id })
+      .sort({ createdAt: -1 })
+      .skip(offset)
+      .limit(limit)
+      .populate('usuario', '-contrasena');
+
+    const total = await this.commentModel.countDocuments({ publicacion: id });
+
+    return {
+      comentarios,
+      total,
+      offset,
+      limit,
+    };
+  }
+
+  async crearComentario(publicacionId: string, createCommentDto: CreateCommentDto, usuarioId: string) {
+    const publicacion = await this.publicationModel.findById(publicacionId);
+    if (!publicacion) {
+      throw new NotFoundException('Publicación no encontrada');
+    }
+
+    if (!publicacion.activo) {
+      throw new BadRequestException('No se puede comentar en esta publicación');
+    }
+
+    const nuevoComentario = new this.commentModel({
+      mensaje: createCommentDto.mensaje,
+      usuario: usuarioId,
+      publicacion: publicacionId,
+    });
+
+    const comentario = await nuevoComentario.save();
+    return await comentario.populate('usuario', '-contrasena');
+  }
+
+  async modificarComentario(comentarioId: string, updateCommentDto: UpdateCommentDto, usuarioId: string) {
+    const comentario = await this.commentModel.findById(comentarioId);
+
+    if (!comentario) {
+      throw new NotFoundException('Comentario no encontrado');
+    }
+
+    if (String(comentario.usuario) !== String(usuarioId)) {
+      throw new ForbiddenException('No tienes permiso para editar este comentario');
+    }
+
+    comentario.mensaje = updateCommentDto.mensaje;
+    comentario.modificado = true;
+
+    await comentario.save();
+    return await comentario.populate('usuario', '-contrasena');
   }
 }
