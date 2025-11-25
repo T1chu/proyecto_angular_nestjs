@@ -1,4 +1,4 @@
-<!-- frontend/src/app/components/dashboard-estadisticas/dashboard-estadisticas.component.html -->
+<!-- frontend/src/app/components/dashboard-estadisticas/dashboard-estadisticas.component.html - ACTUALIZADO -->
 <div class="estadisticas-container">
   <!-- Header -->
   <header class="estadisticas-header">
@@ -43,7 +43,7 @@
       <div class="resumen-icon">📝</div>
       <div class="resumen-info">
         <h3>Total Publicaciones</h3>
-        <p class="resumen-numero">{{ getTotalPublicaciones() }}</p>
+        <p class="resumen-numero" id="stat-publicaciones">{{ totalPublicaciones }}</p>
       </div>
     </div>
 
@@ -51,7 +51,7 @@
       <div class="resumen-icon">💬</div>
       <div class="resumen-info">
         <h3>Total Comentarios</h3>
-        <p class="resumen-numero">{{ getTotalComentarios() }}</p>
+        <p class="resumen-numero" id="stat-comentarios">{{ totalComentarios }}</p>
       </div>
     </div>
 
@@ -59,7 +59,7 @@
       <div class="resumen-icon">👥</div>
       <div class="resumen-info">
         <h3>Usuarios Activos</h3>
-        <p class="resumen-numero">{{ getUsuariosActivos() }}</p>
+        <p class="resumen-numero" id="stat-usuarios">{{ usuariosActivos }}</p>
       </div>
     </div>
 
@@ -67,7 +67,7 @@
       <div class="resumen-icon">🔥</div>
       <div class="resumen-info">
         <h3>Top Publicación</h3>
-        <p class="resumen-numero">{{ getTopPublicacionComentarios() }} 💬</p>
+        <p class="resumen-numero" id="stat-top">{{ topPublicacionComentarios }} 💬</p>
       </div>
     </div>
   </div>

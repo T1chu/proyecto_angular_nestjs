@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthService, Usuario } from './auth.service';
 
@@ -59,25 +60,38 @@ export class AdminService {
     });
   }
 
-  // Estadísticas
-  obtenerPublicacionesPorUsuario(fechaInicio: string, fechaFin: string): Observable<any[]> {
-    return this.http.get<any[]>(
-      `${this.apiUrl}/estadisticas/publicaciones-por-usuario?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`,
-      { headers: this.getHeaders() }
-    );
-  }
-
-  obtenerComentariosPorPeriodo(fechaInicio: string, fechaFin: string): Observable<any[]> {
-    return this.http.get<any[]>(
-      `${this.apiUrl}/estadisticas/comentarios-por-periodo?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`,
-      { headers: this.getHeaders() }
-    );
-  }
-
-  obtenerComentariosPorPublicacion(fechaInicio: string, fechaFin: string): Observable<any[]> {
-    return this.http.get<any[]>(
-      `${this.apiUrl}/estadisticas/comentarios-por-publicacion?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`,
-      { headers: this.getHeaders() }
-    );
-  }
+// Estadísticas
+obtenerPublicacionesPorUsuario(fechaInicio: string, fechaFin: string): Observable<any[]> {
+  return this.http.get<any[]>(
+    `${this.apiUrl}/estadisticas/publicaciones-por-usuario?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`,
+    { headers: this.getHeaders() }
+  ).pipe(
+    tap((datos) => {
+      console.log("🔍 [BACK] Publicaciones por usuario (datos crudos):", datos);
+    })
+  );
 }
+
+obtenerComentariosPorPeriodo(fechaInicio: string, fechaFin: string): Observable<any[]> {
+  return this.http.get<any[]>(
+    `${this.apiUrl}/estadisticas/comentarios-por-periodo?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`,
+    { headers: this.getHeaders() }
+  ).pipe(
+    tap((datos) => {
+      console.log("🔍 [BACK] Comentarios por período (datos crudos):", datos);
+    })
+  );
+}
+
+obtenerComentariosPorPublicacion(fechaInicio: string, fechaFin: string): Observable<any[]> {
+  return this.http.get<any[]>(
+    `${this.apiUrl}/estadisticas/comentarios-por-publicacion?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`,
+    { headers: this.getHeaders() }
+  ).pipe(
+    tap((datos) => {
+      console.log("🔍 [BACK] Comentarios por publicación (datos crudos):", datos);
+    })
+  );
+}
+}
+
