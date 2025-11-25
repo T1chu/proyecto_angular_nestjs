@@ -1,0 +1,170 @@
+<div class="registro-container">
+  <div class="registro-form">
+    <h2>Registro</h2>
+    
+    <form (ngSubmit)="onSubmit()" #registroForm="ngForm">
+      <div class="form-group">
+        <label for="nombre">Nombre: *</label>
+        <input
+          type="text"
+          id="nombre"
+          name="nombre"
+          [(ngModel)]="nombre"
+          required
+          #nombreInput="ngModel"
+        >
+        <div *ngIf="nombreInput.invalid && nombreInput.touched" class="error-msg">
+          El nombre es requerido
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="apellido">Apellido: *</label>
+        <input
+          type="text"
+          id="apellido"
+          name="apellido"
+          [(ngModel)]="apellido"
+          required
+          #apellidoInput="ngModel"
+        >
+        <div *ngIf="apellidoInput.invalid && apellidoInput.touched" class="error-msg">
+          El apellido es requerido
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="usuario">Nombre de Usuario: *</label>
+        <input
+          type="text"
+          id="usuario"
+          name="usuario"
+          [(ngModel)]="usuario"
+          required
+          #usuarioInput="ngModel"
+        >
+        <div *ngIf="usuarioInput.invalid && usuarioInput.touched" class="error-msg">
+          El nombre de usuario es requerido
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="correo">Correo Electrónico: *</label>
+        <input
+          type="email"
+          id="correo"
+          name="correo"
+          [(ngModel)]="correo"
+          required
+          email
+          #correoInput="ngModel"
+        >
+        <div *ngIf="correoInput.invalid && correoInput.touched" class="error-msg">
+          Ingresa un correo válido
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="fechaNacimiento">Fecha de Nacimiento: *</label>
+        <input
+          type="date"
+          id="fechaNacimiento"
+          name="fechaNacimiento"
+          [(ngModel)]="fechaNacimiento"
+          required
+          #fechaInput="ngModel"
+        >
+        <div *ngIf="fechaInput.invalid && fechaInput.touched" class="error-msg">
+          La fecha de nacimiento es requerida
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="contrasena">Contraseña: *</label>
+        <input
+          type="password"
+          id="contrasena"
+          name="contrasena"
+          [(ngModel)]="contrasena"
+          required
+          minlength="8"
+          #contrasenaInput="ngModel"
+        >
+        <div *ngIf="contrasenaInput.invalid && contrasenaInput.touched" class="error-msg">
+          La contraseña debe tener al menos 8 caracteres
+        </div>
+        <small class="hint">Debe contener al menos una mayúscula y un número</small>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmarContrasena">Repetir Contraseña: *</label>
+        <input
+          type="password"
+          id="confirmarContrasena"
+          name="confirmarContrasena"
+          [(ngModel)]="confirmarContrasena"
+          required
+          #confirmarInput="ngModel"
+        >
+        <div *ngIf="confirmarInput.invalid && confirmarInput.touched" class="error-msg">
+          Confirma tu contraseña
+        </div>
+        <div *ngIf="contrasena && confirmarContrasena && contrasena !== confirmarContrasena" class="error-msg">
+          Las contraseñas no coinciden
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion">Descripción Breve:</label>
+        <textarea
+          id="descripcion"
+          name="descripcion"
+          [(ngModel)]="descripcion"
+          rows="3"
+          placeholder="Cuéntanos sobre ti..."
+          maxlength="500"
+        ></textarea>
+        <small class="hint">Opcional - Máximo 500 caracteres</small>
+      </div>
+
+      <div class="form-group">
+        <label for="imagenPerfil">Imagen de Perfil:</label>
+        
+        <!-- Preview de la imagen -->
+        <div *ngIf="imagenPreview" class="preview-container">
+          <img [src]="imagenPreview" alt="Preview" class="imagen-preview">
+          <button type="button" class="btn-eliminar-preview" (click)="eliminarImagen()">
+            ✖ Eliminar
+          </button>
+        </div>
+
+        <!-- Input de archivo -->
+        <input
+          type="file"
+          id="imagenPerfil"
+          name="imagenPerfil"
+          accept="image/jpeg,image/jpg,image/png,image/gif"
+          (change)="onImagenSeleccionada($event)"
+          [disabled]="cargando"
+        >
+        <small class="hint">Opcional - JPG, PNG o GIF (máx. 5MB)</small>
+      </div>
+
+      <div *ngIf="error" class="error-msg error-general">
+        {{ error }}
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="registroForm.invalid || cargando || (contrasena !== confirmarContrasena)"
+        class="btn-primary"
+      >
+        {{ cargando ? 'Registrando...' : 'Registrarse' }}
+      </button>
+    </form>
+
+    <div class="login-link">
+      <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+    </div>
+  </div>
+</div>

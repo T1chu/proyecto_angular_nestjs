@@ -1,0 +1,275 @@
+<!-- frontend/src/app/components/dashboard-usuarios/dashboard-usuarios.component.html -->
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <div class="header-content">
+      <button class="btn-volver" (click)="volver()">
+        ← Volver
+      </button>
+      <h1>🔐 Gestión de Usuarios</h1>
+      <button class="btn-crear" (click)="toggleFormulario()">
+        {{ mostrarFormulario ? '✖ Cancelar' : '➕ Nuevo Usuario' }}
+      </button>
+    </div>
+  </header>
+
+  <!-- Formulario de creación -->
+  <div *ngIf="mostrarFormulario" class="formulario-card">
+    <h2>Crear Nuevo Usuario</h2>
+    
+    <form (ngSubmit)="crearUsuario()" #usuarioForm="ngForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nombre">Nombre *</label>
+          <input
+            type="text"
+            id="nombre"
+            name="nombre"
+            [(ngModel)]="nombre"
+            required
+            [disabled]="enviando"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="apellido">Apellido *</label>
+          <input
+            type="text"
+            id="apellido"
+            name="apellido"
+            [(ngModel)]="apellido"
+            required
+            [disabled]="enviando"
+          >
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nombreUsuario">Nombre de Usuario *</label>
+          <input
+            type="text"
+            id="nombreUsuario"
+            name="nombreUsuario"
+            [(ngModel)]="nombreUsuario"
+            required
+            [disabled]="enviando"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="correo">Correo Electrónico *</label>
+          <input
+            type="email"
+            id="correo"
+            name="correo"
+            [(ngModel)]="correo"
+            required
+            email
+            [disabled]="enviando"
+          >
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="contrasena">Contraseña *</label>
+          <input
+            type="password"
+            id="contrasena"
+            name="contrasena"
+            [(ngModel)]="contrasena"
+            required
+            minlength="8"
+            [disabled]="enviando"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="confirmarContrasena">Confirmar Contraseña *</label>
+          <input
+            type="password"
+            id="confirmarContrasena"
+            name="confirmarContrasena"
+            [(ngModel)]="confirmarContrasena"
+            required
+            [disabled]="enviando"
+          >
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fechaNacimiento">Fecha de Nacimiento *</label>
+          <input
+            type="date"
+            id="fechaNacimiento"
+            name="fechaNacimiento"
+            [(ngModel)]="fechaNacimiento"
+            required
+            [disabled]="enviando"
+          >
+        </div>
+
+        <div class="form-group">
+          <label>Perfil *</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input
+                type="radio"
+                name="perfil"
+                value="usuario"
+                [(ngModel)]="perfil"
+                [disabled]="enviando"
+              >
+              <span>Usuario</span>
+            </label>
+            <label class="radio-label">
+              <input
+                type="radio"
+                name="perfil"
+                value="administrador"
+                [(ngModel)]="perfil"
+                [disabled]="enviando"
+              >
+              <span>Administrador</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <textarea
+          id="descripcion"
+          name="descripcion"
+          [(ngModel)]="descripcion"
+          rows="3"
+          [disabled]="enviando"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="imagenPerfil">Imagen de Perfil</label>
+        <input
+          type="file"
+          id="imagenPerfil"
+          name="imagenPerfil"
+          accept="image/jpeg,image/jpg,image/png,image/gif"
+          (change)="onImagenSeleccionada($event)"
+          [disabled]="enviando"
+        >
+      </div>
+
+      <div *ngIf="error" class="error-msg">
+        {{ error }}
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="toggleFormulario()"
+          [disabled]="enviando"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="usuarioForm.invalid || enviando || contrasena !== confirmarContrasena"
+        >
+          {{ enviando ? 'Creando...' : 'Crear Usuario' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Filtro de búsqueda -->
+  <div class="filtros-section">
+    <div class="filtro-busqueda">
+      <input
+        type="text"
+        placeholder="🔍 Buscar por nombre, usuario o correo..."
+        [(ngModel)]="filtro"
+        (ngModelChange)="filtrarUsuarios()"
+      >
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="cargando" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando usuarios...</p>
+  </div>
+
+  <!-- Tabla de usuarios -->
+  <div *ngIf="!cargando" class="usuarios-tabla-container">
+    <table class="usuarios-tabla">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Nombre Completo</th>
+          <th>Correo</th>
+          <th>Perfil</th>
+          <th>Estado</th>
+          <th>Registro</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr 
+          *ngFor="let usuario of usuariosFiltrados"
+          [class.inactivo]="!usuario.activo"
+          appHighlight
+          [highlightColor]="usuario.activo ? 'rgba(220, 20, 60, 0.1)' : 'rgba(128, 128, 128, 0.1)'"
+        >
+          <td>
+            <div class="usuario-cell">
+              <img 
+                [src]="usuario.imagenPerfil || '/assets/default-avatar.png'"
+                [alt]="usuario.nombreUsuario"
+                class="avatar-mini"
+              >
+              <span class="usuario-nombre">@{{ usuario.nombreUsuario }}</span>
+            </div>
+          </td>
+          <td>{{ usuario | nombreCompleto }}</td>
+          <td>{{ usuario.correo }}</td>
+          <td>
+            <span 
+              class="badge"
+              [class.badge-admin]="usuario.perfil === 'administrador'"
+              [class.badge-user]="usuario.perfil === 'usuario'"
+            >
+              {{ usuario.perfil === 'administrador' ? '👑 Admin' : '👤 Usuario' }}
+            </span>
+          </td>
+          <td>
+            <span 
+              class="estado"
+              [class.activo]="usuario.activo"
+              [class.inactivo]="!usuario.activo"
+            >
+              {{ usuario.activo ? '✓ Activo' : '✖ Inactivo' }}
+            </span>
+          </td>
+          <td>{{ usuario.createdAt | tiempoTranscurrido }}</td>
+          <td>
+            <button
+              class="btn-toggle"
+              [class.btn-deshabilitar]="usuario.activo"
+              [class.btn-habilitar]="!usuario.activo"
+              (click)="toggleEstadoUsuario(usuario)"
+            >
+              {{ usuario.activo ? '🚫 Deshabilitar' : '✓ Habilitar' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="usuariosFiltrados.length === 0" class="sin-resultados">
+      <p>No se encontraron usuarios</p>
+    </div>
+  </div>
+</div>

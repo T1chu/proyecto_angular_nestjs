@@ -1,0 +1,433 @@
+/* frontend/src/app/components/dashboard-usuarios/dashboard-usuarios.component.css */
+.dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #8b0000 100%);
+  padding-bottom: 2rem;
+}
+
+.dashboard-header {
+  background: rgba(26, 26, 26, 0.95);
+  padding: 1.5rem;
+  border-bottom: 2px solid rgba(220, 20, 60, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-content h1 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
+}
+
+.btn-volver,
+.btn-crear {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-volver {
+  background: rgba(220, 20, 60, 0.1);
+  color: #dc143c;
+  border: 2px solid #dc143c;
+}
+
+.btn-volver:hover {
+  background: #dc143c;
+  color: white;
+  box-shadow: 0 0 15px rgba(220, 20, 60, 0.6);
+}
+
+.btn-crear {
+  background: linear-gradient(135deg, #dc143c 0%, #b01030 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
+}
+
+.btn-crear:hover {
+  background: linear-gradient(135deg, #ff1744 0%, #dc143c 100%);
+  box-shadow: 0 6px 20px rgba(220, 20, 60, 0.6);
+  transform: translateY(-2px);
+}
+
+.formulario-card {
+  max-width: 1000px;
+  margin: 2rem auto;
+  background: rgba(26, 26, 26, 0.95);
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(220, 20, 60, 0.3);
+}
+
+.formulario-card h2 {
+  margin: 0 0 1.5rem 0;
+  color: #dc143c;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #dc143c;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background: rgba(10, 10, 10, 0.8);
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #dc143c;
+  box-shadow: 0 0 15px rgba(220, 20, 60, 0.4);
+}
+
+.form-group input[type="file"] {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.radio-group {
+  display: flex;
+  gap: 2rem;
+  padding: 0.75rem;
+  background: rgba(10, 10, 10, 0.8);
+  border-radius: 8px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #b0b0b0;
+  font-weight: 600;
+}
+
+.radio-label input[type="radio"] {
+  width: auto;
+  cursor: pointer;
+  accent-color: #dc143c;
+}
+
+.radio-label span {
+  user-select: none;
+}
+
+.error-msg {
+  background: rgba(220, 20, 60, 0.1);
+  border: 2px solid #dc143c;
+  color: #ff1744;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #dc143c 0%, #b01030 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff1744 0%, #dc143c 100%);
+  box-shadow: 0 6px 20px rgba(220, 20, 60, 0.6);
+  transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: rgba(220, 20, 60, 0.1);
+  color: #dc143c;
+  border: 2px solid #dc143c;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(220, 20, 60, 0.2);
+}
+
+.filtros-section {
+  max-width: 1400px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.filtro-busqueda input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background: rgba(26, 26, 26, 0.95);
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.filtro-busqueda input:focus {
+  outline: none;
+  border-color: #dc143c;
+  box-shadow: 0 0 15px rgba(220, 20, 60, 0.4);
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #b0b0b0;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 1rem;
+  border: 4px solid rgba(220, 20, 60, 0.2);
+  border-top-color: #dc143c;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.usuarios-tabla-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  overflow-x: auto;
+}
+
+.usuarios-tabla {
+  width: 100%;
+  background: rgba(26, 26, 26, 0.95);
+  border-radius: 15px;
+  overflow: hidden;
+  border-collapse: collapse;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.usuarios-tabla thead {
+  background: rgba(220, 20, 60, 0.2);
+}
+
+.usuarios-tabla th {
+  padding: 1rem;
+  text-align: left;
+  color: #dc143c;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  border-bottom: 2px solid rgba(220, 20, 60, 0.3);
+}
+
+.usuarios-tabla td {
+  padding: 1rem;
+  color: #b0b0b0;
+  border-bottom: 1px solid rgba(220, 20, 60, 0.1);
+}
+
+.usuarios-tabla tbody tr {
+  transition: all 0.3s;
+}
+
+.usuarios-tabla tbody tr:hover {
+  background: rgba(220, 20, 60, 0.05);
+}
+
+.usuarios-tabla tbody tr.inactivo {
+  opacity: 0.6;
+}
+
+.usuario-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar-mini {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #dc143c;
+}
+
+.usuario-nombre {
+  font-weight: 600;
+  color: #fff;
+}
+
+.badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-admin {
+  background: linear-gradient(135deg, #dc143c 0%, #b01030 100%);
+  color: white;
+  box-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
+}
+
+.badge-user {
+  background: rgba(220, 20, 60, 0.2);
+  color: #dc143c;
+  border: 1px solid #dc143c;
+}
+
+.estado {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.estado.activo {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border: 1px solid #22c55e;
+}
+
+.estado.inactivo {
+  background: rgba(128, 128, 128, 0.2);
+  color: #808080;
+  border: 1px solid #808080;
+}
+
+.btn-toggle {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+}
+
+.btn-deshabilitar {
+  background: rgba(128, 128, 128, 0.2);
+  color: #808080;
+  border: 1px solid #808080;
+}
+
+.btn-deshabilitar:hover {
+  background: #808080;
+  color: white;
+  box-shadow: 0 0 10px rgba(128, 128, 128, 0.5);
+}
+
+.btn-habilitar {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border: 1px solid #22c55e;
+}
+
+.btn-habilitar:hover {
+  background: #22c55e;
+  color: white;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+}
+
+.sin-resultados {
+  text-align: center;
+  padding: 3rem;
+  color: #888;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .usuarios-tabla {
+    font-size: 0.85rem;
+  }
+
+  .usuarios-tabla th,
+  .usuarios-tabla td {
+    padding: 0.75rem 0.5rem;
+  }
+}

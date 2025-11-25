@@ -1,0 +1,163 @@
+<div class="perfil-container" *ngIf="usuario">
+  <div class="perfil-card">
+    <div class="perfil-header">
+      <button class="btn-atras" (click)="volverPublicaciones()" title="Volver a publicaciones">
+        <span class="arrow-icon">←</span>
+        <span class="text">Volver</span>
+      </button>
+      
+      <div class="perfil-avatar">
+        <img 
+          [src]="usuario.imagenPerfil || '/assets/default-avatar.png'" 
+          [alt]="usuario.nombre"
+          class="avatar-img"
+          [class.loading]="cargando"
+        >
+        <div *ngIf="cargando" class="loading-overlay">
+          <div class="spinner-upload"></div>
+        </div>
+        <label 
+          *ngIf="editando"
+          class="btn-cambiar-foto" 
+          [class.disabled]="cargando"
+          title="Cambiar foto de perfil"
+        >
+          <input 
+            type="file" 
+            accept="image/jpeg,image/jpg,image/png,image/gif"
+            (change)="cambiarFotoPerfil($event)"
+            [disabled]="cargando"
+            #fileInput
+          >
+          <span class="camera-icon">📷</span>
+        </label>
+      </div>
+      
+      <div class="perfil-info" *ngIf="!editando">
+        <h2>{{ usuario.nombre }} {{ usuario.apellido }}</h2>
+        <p class="usuario-handle">@{{ usuario.nombreUsuario }}</p>
+        <p class="usuario-email">{{ usuario.correo }}</p>
+      </div>
+      
+      <div class="perfil-acciones">
+        <button 
+          (click)="toggleEdicion()" 
+          class="btn-secondary"
+          [disabled]="cargando"
+        >
+          {{ editando ? 'Cancelar' : 'Editar Perfil' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="perfil-content">
+      <!-- Mensaje de éxito -->
+      <div *ngIf="mensajeExito" class="mensaje-exito">
+        {{ mensajeExito }}
+      </div>
+
+      <div *ngIf="!editando" class="perfil-vista">
+        <div class="campo">
+          <label>Descripción:</label>
+          <p>{{ usuario.descripcion || 'Sin descripción' }}</p>
+        </div>
+        <div class="campo">
+          <label>Fecha de Nacimiento:</label>
+          <p>{{ usuario.fechaNacimiento | date:'dd/MM/yyyy' }}</p>
+        </div>
+        <div class="campo">
+          <label>Perfil:</label>
+          <p>{{ usuario.perfil }}</p>
+        </div>
+
+        <!-- Últimas 3 publicaciones -->
+        <div class="ultimas-publicaciones" *ngIf="publicaciones.length > 0">
+          <h3>Mis últimas publicaciones</h3>
+          <div class="publicaciones-grid">
+            <div *ngFor="let pub of publicaciones" class="mini-publicacion">
+              <div class="mini-pub-header">
+                <h4>{{ pub.titulo }}</h4>
+                <span class="mini-pub-fecha">{{ pub.createdAt | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <p class="mini-pub-mensaje">{{ pub.mensaje }}</p>
+              <div *ngIf="pub.imagen" class="mini-pub-imagen">
+                <img [src]="pub.imagen" [alt]="pub.titulo">
+              </div>
+              <div class="mini-pub-stats">
+                <span>❤️ {{ pub.meGusta?.length || 0 }} me gusta</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="publicaciones.length === 0" class="sin-publicaciones-mensaje">
+          <p>📝 Aún no has creado ninguna publicación</p>
+        </div>
+      </div>
+
+      <div *ngIf="editando" class="perfil-edicion">
+        <form (ngSubmit)="guardarCambios()" #perfilForm="ngForm">
+          <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input
+              type="text"
+              id="nombre"
+              name="nombre"
+              [(ngModel)]="nombre"
+              required
+              #nombreInput="ngModel"
+            >
+            <div *ngIf="nombreInput.invalid && nombreInput.touched" class="error-msg">
+              El nombre es requerido
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="apellido">Apellido:</label>
+            <input
+              type="text"
+              id="apellido"
+              name="apellido"
+              [(ngModel)]="apellido"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="descripcion">Descripción:</label>
+            <textarea
+              id="descripcion"
+              name="descripcion"
+              [(ngModel)]="descripcion"
+              rows="4"
+              maxlength="500"
+            ></textarea>
+          </div>
+
+          <div *ngIf="error" class="error-msg">
+            {{ error }}
+          </div>
+
+          <div class="form-acciones">
+            <button
+              type="submit"
+              [disabled]="perfilForm.invalid || cargando"
+              class="btn-primary"
+            >
+              {{ cargando ? 'Guardando...' : 'Guardar Cambios' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="perfil-footer">
+      <button (click)="cerrarSesion()" class="btn-danger">
+        Cerrar Sesión
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!usuario" class="loading">
+  Cargando perfil...
+</div>

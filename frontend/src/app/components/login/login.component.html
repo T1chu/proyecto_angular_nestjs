@@ -1,0 +1,53 @@
+<div class="login-container">
+  <div class="login-form">
+    <h2>Iniciar Sesión</h2>
+    
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <div class="form-group">
+        <label for="usuarioOCorreo">Usuario o Correo:</label>
+        <input
+          type="text"
+          id="usuarioOCorreo"
+          name="usuarioOCorreo"
+          [(ngModel)]="usuarioOCorreo"
+          required
+          #usuarioInput="ngModel"
+        >
+        <div *ngIf="usuarioInput.invalid && usuarioInput.touched" class="error-msg">
+          Este campo es requerido
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="contrasena">Contraseña:</label>
+        <input
+          type="password"
+          id="contrasena"
+          name="contrasena"
+          [(ngModel)]="contrasena"
+          required
+          #contrasenaInput="ngModel"
+        >
+        <div *ngIf="contrasenaInput.invalid && contrasenaInput.touched" class="error-msg">
+          La contraseña es requerida
+        </div>
+      </div>
+
+      <div *ngIf="error" class="error-msg">
+        {{ error }}
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="loginForm.invalid || cargando"
+        class="btn-primary"
+      >
+        {{ cargando ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+      </button>
+    </form>
+
+    <div class="register-link">
+      <p>¿No tienes cuenta? <a href="/registro">Regístrate</a></p>
+    </div>
+  </div>
+</div>

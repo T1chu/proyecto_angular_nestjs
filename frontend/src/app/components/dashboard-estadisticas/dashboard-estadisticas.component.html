@@ -1,0 +1,163 @@
+<!-- frontend/src/app/components/dashboard-estadisticas/dashboard-estadisticas.component.html -->
+<div class="estadisticas-container">
+  <!-- Header -->
+  <header class="estadisticas-header">
+    <div class="header-content">
+      <h1>📊 Estadísticas</h1>
+      <button class="btn-volver" (click)="volver()">
+        ← Volver
+      </button>
+    </div>
+  </header>
+
+  <!-- Filtros de fecha -->
+  <div class="filtros-fecha">
+    <div class="filtros-content">
+      <div class="fecha-group">
+        <label for="fechaInicio">Fecha Inicio:</label>
+        <input
+          type="date"
+          id="fechaInicio"
+          [(ngModel)]="fechaInicio"
+        >
+      </div>
+
+      <div class="fecha-group">
+        <label for="fechaFin">Fecha Fin:</label>
+        <input
+          type="date"
+          id="fechaFin"
+          [(ngModel)]="fechaFin"
+        >
+      </div>
+
+      <button class="btn-actualizar" (click)="cargarTodasEstadisticas()">
+        🔄 Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Resumen general -->
+  <div class="resumen-general">
+    <div class="resumen-card">
+      <div class="resumen-icon">📝</div>
+      <div class="resumen-info">
+        <h3>Total Publicaciones</h3>
+        <p class="resumen-numero">{{ getTotalPublicaciones() }}</p>
+      </div>
+    </div>
+
+    <div class="resumen-card">
+      <div class="resumen-icon">💬</div>
+      <div class="resumen-info">
+        <h3>Total Comentarios</h3>
+        <p class="resumen-numero">{{ getTotalComentarios() }}</p>
+      </div>
+    </div>
+
+    <div class="resumen-card">
+      <div class="resumen-icon">👥</div>
+      <div class="resumen-info">
+        <h3>Usuarios Activos</h3>
+        <p class="resumen-numero">{{ getUsuariosActivos() }}</p>
+      </div>
+    </div>
+
+    <div class="resumen-card">
+      <div class="resumen-icon">🔥</div>
+      <div class="resumen-info">
+        <h3>Top Publicación</h3>
+        <p class="resumen-numero">{{ getTopPublicacionComentarios() }} 💬</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos -->
+  <div class="graficos-grid">
+    <!-- Gráfico 1: Publicaciones por usuario -->
+    <div class="grafico-card" [appLoadingSpinner]="cargandoPublicaciones">
+      <div class="grafico-header">
+        <h2>Publicaciones por Usuario</h2>
+        <span class="grafico-tipo">Barras</span>
+      </div>
+      <div class="grafico-canvas-container" *ngIf="!cargandoPublicaciones">
+        <canvas 
+          #chartPublicaciones
+          id="chartPublicaciones" 
+          width="600" 
+          height="400"
+          style="max-width: 100%; height: auto;"
+          *ngIf="publicacionesPorUsuario.length > 0"
+        ></canvas>
+        <div class="sin-datos" *ngIf="publicacionesPorUsuario.length === 0">
+          <p>No hay datos disponibles</p>
+          <small>Intenta ajustar el rango de fechas</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfico 2: Comentarios por periodo -->
+    <div class="grafico-card" [appLoadingSpinner]="cargandoComentarios">
+      <div class="grafico-header">
+        <h2>Comentarios por Periodo</h2>
+        <span class="grafico-tipo">Línea</span>
+      </div>
+      <div class="grafico-canvas-container" *ngIf="!cargandoComentarios">
+        <canvas 
+          #chartComentariosPeriodo
+          id="chartComentariosPeriodo" 
+          width="600" 
+          height="400"
+          style="max-width: 100%; height: auto;"
+          *ngIf="comentariosPorPeriodo.length > 0"
+        ></canvas>
+        <div class="sin-datos" *ngIf="comentariosPorPeriodo.length === 0">
+          <p>No hay datos disponibles</p>
+          <small>Intenta ajustar el rango de fechas</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfico 3: Comentarios por publicación -->
+    <div class="grafico-card grafico-card-full" [appLoadingSpinner]="cargandoComentariosPublicacion">
+      <div class="grafico-header">
+        <h2>Top 10 Publicaciones con Más Comentarios</h2>
+        <span class="grafico-tipo">Torta</span>
+      </div>
+      <div class="grafico-content-horizontal" *ngIf="!cargandoComentariosPublicacion">
+        <!-- Canvas del gráfico -->
+        <div class="grafico-canvas-container" style="flex: 1;">
+          <canvas 
+            #chartComentariosPublicacion
+            id="chartComentariosPublicacion" 
+            width="500" 
+            height="500"
+            style="max-width: 100%; height: auto;"
+            *ngIf="comentariosPorPublicacion.length > 0"
+          ></canvas>
+          <div class="sin-datos" *ngIf="comentariosPorPublicacion.length === 0">
+            <p>No hay datos disponibles</p>
+            <small>Intenta ajustar el rango de fechas</small>
+          </div>
+        </div>
+        
+        <!-- Leyenda lateral -->
+        <div class="leyenda-vertical" *ngIf="comentariosPorPublicacion.length > 0">
+          <h3>Publicaciones</h3>
+          <div class="leyenda-items-vertical">
+            <div 
+              *ngFor="let item of comentariosPorPublicacion; let i = index" 
+              class="leyenda-item-vertical"
+            >
+              <span class="leyenda-numero">{{ i + 1 }}.</span>
+              <div class="leyenda-info">
+                <span class="leyenda-titulo">{{ item.titulo }}</span>
+                <span class="leyenda-cantidad">{{ item.cantidad }} comentarios</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
