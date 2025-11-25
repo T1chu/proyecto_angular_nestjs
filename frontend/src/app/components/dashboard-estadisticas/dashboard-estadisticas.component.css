@@ -143,6 +143,7 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(220, 20, 60, 0.3);
   position: relative;
+  min-height: 500px;
 }
 
 .grafico-card-full {
@@ -181,9 +182,16 @@
   justify-content: center;
   align-items: center;
   min-height: 400px;
+  width: 100%;
 }
 
+/* 🔥 CRÍTICO: Asegurar que el canvas sea visible */
 .grafico-canvas-container canvas {
+  display: block !important;
+  background: rgba(0, 0, 0, 0.6) !important; /* Fondo semi-opaco para ver los gráficos */
+  border: 3px solid #dc143c !important; /* Borde más visible */
+  border-radius: 12px;
+  padding: 0 !important; /* Sin padding para no afectar las dimensiones */
   max-width: 100%;
   height: auto;
 }
@@ -449,10 +457,5 @@
 
   .resumen-general {
     grid-template-columns: 1fr;
-  }
-
-  .grafico-canvas-container canvas {
-    width: 100% !important;
-    height: auto !important;
   }
 }

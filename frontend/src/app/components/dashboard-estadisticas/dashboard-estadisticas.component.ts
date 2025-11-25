@@ -1,5 +1,5 @@
-// frontend/src/app/components/dashboard-estadisticas/dashboard-estadisticas.component.ts - CORREGIDO
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+// frontend/src/app/components/dashboard-estadisticas/dashboard-estadisticas.component.ts - FORZAR ACTUALIZACIÓN
+import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,7 +13,7 @@ import { LoadingSpinnerDirective } from '../../directives/loading-spinner.direct
   templateUrl: './dashboard-estadisticas.component.html',
   styleUrls: ['./dashboard-estadisticas.component.css']
 })
-export class DashboardEstadisticasComponent implements OnInit, AfterViewInit {
+export class DashboardEstadisticasComponent implements OnInit {
   @ViewChild('chartPublicaciones') chartPublicacionesRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('chartComentariosPeriodo') chartComentariosPeriodoRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('chartComentariosPublicacion') chartComentariosPublicacionRef!: ElementRef<HTMLCanvasElement>;
@@ -28,114 +28,159 @@ export class DashboardEstadisticasComponent implements OnInit, AfterViewInit {
   cargandoPublicaciones: boolean = false;
   cargandoComentarios: boolean = false;
   cargandoComentariosPublicacion: boolean = false;
-
-  private chartsRendered = {
-    publicaciones: false,
-    comentarios: false,
-    publicacionesTop: false
-  };
+  
+  // 🔥 Contador para forzar re-render
+  private renderKey: number = 0;
 
   constructor(
     private adminService: AdminService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
-    // 🔥 CORRECCIÓN: Usar fechas más amplias por defecto
-    const hoy = new Date();
-    const haceUnAnio = new Date();
-    haceUnAnio.setFullYear(hoy.getFullYear() - 1); // Hace 1 año
-    
-    this.fechaInicio = haceUnAnio.toISOString().split('T')[0];
-    this.fechaFin = hoy.toISOString().split('T')[0];
-    
-    console.log('📅 Fechas iniciales (1 año):', {
-      inicio: this.fechaInicio,
-      fin: this.fechaFin
-    });
+    this.fechaInicio = '';
+    this.fechaFin = '';
   }
 
   ngOnInit(): void {
+    console.log('🚀 === COMPONENTE INICIADO ===');
     this.cargarTodasEstadisticas();
-  }
-
-  ngAfterViewInit(): void {
-    // Renderizar gráficos después de que la vista esté lista
-    setTimeout(() => {
-      this.renderizarTodosLosGraficos();
-    }, 100);
   }
 
   getTotalComentarios(): number {
     const total = this.comentariosPorPeriodo.reduce((sum, d) => sum + d.cantidad, 0);
+    console.log('🔢 Total comentarios calculado:', total);
     return total;
   }
 
   getTotalPublicaciones(): number {
     const total = this.publicacionesPorUsuario.reduce((sum, d) => sum + d.cantidad, 0);
+    console.log('🔢 Total publicaciones calculado:', total);
     return total;
   }
 
   getUsuariosActivos(): number {
-    return this.publicacionesPorUsuario.length;
+    const total = this.publicacionesPorUsuario.length;
+    console.log('🔢 Usuarios activos:', total);
+    return total;
   }
 
   getTopPublicacionComentarios(): number {
     if (this.comentariosPorPublicacion.length === 0) return 0;
-    return this.comentariosPorPublicacion[0]?.cantidad || 0;
+    const top = this.comentariosPorPublicacion[0]?.cantidad || 0;
+    console.log('🔢 Top publicación comentarios:', top);
+    return top;
   }
 
   cargarTodasEstadisticas(): void {
-    console.log('🔄 === CARGANDO TODAS LAS ESTADÍSTICAS ===');
+    console.log('\n🔄 === BOTÓN ACTUALIZAR PRESIONADO ===');
+    console.log('Fechas:', { inicio: this.fechaInicio, fin: this.fechaFin });
+    
+    // 🔥 Incrementar el contador
+    this.renderKey++;
+    
+    // 🔥 Limpiar datos anteriores INMEDIATAMENTE
+    this.publicacionesPorUsuario = [];
+    this.comentariosPorPeriodo = [];
+    this.comentariosPorPublicacion = [];
+    
+    // Forzar detección de cambios
+    this.cdr.detectChanges();
+    
+    console.log('📊 Estadísticas limpiadas, cargando nuevos datos...');
+    
+    // Cargar nuevos datos
     this.cargarPublicacionesPorUsuario();
     this.cargarComentariosPorPeriodo();
     this.cargarComentariosPorPublicacion();
+    
+    // 🔥 FORZAR actualización de estadísticas después de un tiempo
+    setTimeout(() => {
+      console.log('\n🔢 === VERIFICANDO ESTADÍSTICAS ===');
+      console.log('Total Publicaciones:', this.getTotalPublicaciones());
+      console.log('Total Comentarios:', this.getTotalComentarios());
+      console.log('Usuarios Activos:', this.getUsuariosActivos());
+      console.log('Top Publicación:', this.getTopPublicacionComentarios());
+      
+      // Forzar actualización de la vista
+      this.cdr.detectChanges();
+    }, 1000);
   }
 
   cargarPublicacionesPorUsuario(): void {
-    console.log('\n📊 === PUBLICACIONES POR USUARIO ===');
+    console.log('\n📊 [1/3] Cargando publicaciones por usuario...');
     
     this.cargandoPublicaciones = true;
+    
     this.adminService.obtenerPublicacionesPorUsuario(this.fechaInicio, this.fechaFin).subscribe({
       next: (datos) => {
-        console.log('✅ Datos recibidos:', datos);
+        console.log('✅ Publicaciones recibidas:', datos);
+        console.log('   Total usuarios:', datos?.length || 0);
         
         this.publicacionesPorUsuario = datos || [];
         this.cargandoPublicaciones = false;
-        this.chartsRendered.publicaciones = false;
+        
+        // 🔥 FORZAR actualización de estadísticas
+        console.log('📊 Actualizando estadísticas de publicaciones...');
+        console.log('   Total publicaciones:', this.getTotalPublicaciones());
+        console.log('   Usuarios activos:', this.getUsuariosActivos());
+        
+        // Forzar detección de cambios
+        this.cdr.detectChanges();
         
         if (this.publicacionesPorUsuario.length > 0) {
-          setTimeout(() => this.renderizarGraficoPublicaciones(), 200);
+          setTimeout(() => {
+            if (this.chartPublicacionesRef) {
+              console.log('🎨 Renderizando gráfico de publicaciones...');
+              this.renderizarGraficoPublicaciones();
+              // Forzar detección después de renderizar
+              this.cdr.detectChanges();
+            } else {
+              console.error('❌ chartPublicacionesRef no disponible');
+            }
+          }, 200);
         } else {
-          console.warn('⚠️ No hay datos de publicaciones');
+          console.warn('⚠️ No hay datos de publicaciones para mostrar');
         }
       },
       error: (error) => {
-        console.error('❌ Error:', error);
+        console.error('❌ Error cargando publicaciones:', error);
         this.cargandoPublicaciones = false;
         this.publicacionesPorUsuario = [];
+        this.cdr.detectChanges();
       }
     });
   }
 
   cargarComentariosPorPeriodo(): void {
-    console.log('\n💬 === COMENTARIOS POR PERIODO ===');
+    console.log('\n💬 [2/3] Cargando comentarios por periodo...');
     
     this.cargandoComentarios = true;
+    
     this.adminService.obtenerComentariosPorPeriodo(this.fechaInicio, this.fechaFin).subscribe({
       next: (datos) => {
-        console.log('✅ Datos recibidos:', datos);
+        console.log('✅ Comentarios recibidos:', datos);
+        console.log('   Total periodos:', datos?.length || 0);
         
         this.comentariosPorPeriodo = datos || [];
         this.cargandoComentarios = false;
-        this.chartsRendered.comentarios = false;
+        
+        this.cdr.detectChanges();
         
         if (this.comentariosPorPeriodo.length > 0) {
-          setTimeout(() => this.renderizarGraficoComentariosPeriodo(), 200);
+          setTimeout(() => {
+            if (this.chartComentariosPeriodoRef) {
+              console.log('🎨 Renderizando gráfico de comentarios por periodo...');
+              this.renderizarGraficoComentariosPeriodo();
+            } else {
+              console.error('❌ chartComentariosPeriodoRef no disponible');
+            }
+          }, 200);
         } else {
-          console.warn('⚠️ No hay datos de comentarios');
+          console.warn('⚠️ No hay datos de comentarios para mostrar');
         }
       },
       error: (error) => {
-        console.error('❌ Error:', error);
+        console.error('❌ Error cargando comentarios:', error);
         this.cargandoComentarios = false;
         this.comentariosPorPeriodo = [];
       }
@@ -143,131 +188,138 @@ export class DashboardEstadisticasComponent implements OnInit, AfterViewInit {
   }
 
   cargarComentariosPorPublicacion(): void {
-    console.log('\n📊 === COMENTARIOS POR PUBLICACION ===');
+    console.log('\n📊 [3/3] Cargando comentarios por publicación...');
     
     this.cargandoComentariosPublicacion = true;
+    
     this.adminService.obtenerComentariosPorPublicacion(this.fechaInicio, this.fechaFin).subscribe({
       next: (datos) => {
-        console.log('✅ Datos recibidos:', datos);
+        console.log('✅ Top publicaciones recibidas:', datos);
+        console.log('   Total publicaciones:', datos?.length || 0);
         
         this.comentariosPorPublicacion = datos || [];
         this.cargandoComentariosPublicacion = false;
-        this.chartsRendered.publicacionesTop = false;
+        
+        // 🔥 FORZAR actualización de estadísticas
+        console.log('📊 Actualizando top publicación...');
+        console.log('   Top comentarios:', this.getTopPublicacionComentarios());
+        
+        this.cdr.detectChanges();
         
         if (this.comentariosPorPublicacion.length > 0) {
-          setTimeout(() => this.renderizarGraficoComentariosPublicacion(), 200);
+          setTimeout(() => {
+            if (this.chartComentariosPublicacionRef) {
+              console.log('🎨 Renderizando gráfico de top publicaciones...');
+              this.renderizarGraficoComentariosPublicacion();
+              // Forzar detección después de renderizar
+              this.cdr.detectChanges();
+            } else {
+              console.error('❌ chartComentariosPublicacionRef no disponible');
+            }
+          }, 200);
         } else {
-          console.warn('⚠️ No hay datos de publicaciones con comentarios');
+          console.warn('⚠️ No hay datos de top publicaciones para mostrar');
         }
       },
       error: (error) => {
-        console.error('❌ Error:', error);
+        console.error('❌ Error cargando top publicaciones:', error);
         this.cargandoComentariosPublicacion = false;
         this.comentariosPorPublicacion = [];
+        this.cdr.detectChanges();
       }
     });
   }
 
-  renderizarTodosLosGraficos(): void {
-    if (this.publicacionesPorUsuario.length > 0 && !this.chartsRendered.publicaciones) {
-      this.renderizarGraficoPublicaciones();
-    }
-    if (this.comentariosPorPeriodo.length > 0 && !this.chartsRendered.comentarios) {
-      this.renderizarGraficoComentariosPeriodo();
-    }
-    if (this.comentariosPorPublicacion.length > 0 && !this.chartsRendered.publicacionesTop) {
-      this.renderizarGraficoComentariosPublicacion();
-    }
-  }
-
   renderizarGraficoPublicaciones(): void {
-    if (!this.chartPublicacionesRef || this.chartsRendered.publicaciones) return;
-    
-    console.log('🎨 Renderizando gráfico de publicaciones...');
     const canvas = this.chartPublicacionesRef.nativeElement;
-    
-    if (!canvas || this.publicacionesPorUsuario.length === 0) {
-      console.warn('⚠️ No se puede renderizar');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('❌ No se pudo obtener contexto 2D');
       return;
     }
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
     const width = canvas.width;
     const height = canvas.height;
-    const padding = 60;
-    const barWidth = (width - 2 * padding) / this.publicacionesPorUsuario.length;
+    const padding = 80; // Aumentar padding
+    const barWidth = (width - 2 * padding) / Math.max(this.publicacionesPorUsuario.length, 1);
 
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = 'rgba(10, 10, 10, 0.8)';
+    console.log('🎨 Dimensiones:', { width, height, padding, barWidth });
+    console.log('📊 Datos a graficar:', this.publicacionesPorUsuario);
+
+    // 🔥 LIMPIAR COMPLETAMENTE con fondo oscuro
+    ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, width, height);
 
     const maxValue = Math.max(...this.publicacionesPorUsuario.map(d => d.cantidad), 1);
+    console.log('📈 Valor máximo:', maxValue);
 
     this.publicacionesPorUsuario.forEach((dato, index) => {
       const barHeight = ((dato.cantidad / maxValue) * (height - 2 * padding));
       const x = padding + index * barWidth + barWidth * 0.1;
       const y = height - padding - barHeight;
 
+      console.log(`   Barra ${index + 1}: ${dato.nombreUsuario} = ${dato.cantidad}`);
+
       const gradient = ctx.createLinearGradient(x, y, x, height - padding);
-      gradient.addColorStop(0, '#dc143c');
-      gradient.addColorStop(1, '#8b0000');
+      gradient.addColorStop(0, '#ff1744');
+      gradient.addColorStop(1, '#dc143c');
 
       ctx.fillStyle = gradient;
       ctx.fillRect(x, y, barWidth * 0.8, barHeight);
 
-      ctx.fillStyle = '#b0b0b0';
-      ctx.font = 'bold 14px sans-serif';
+      // Número encima de la barra
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 20px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(dato.cantidad.toString(), x + barWidth * 0.4, y - 5);
+      ctx.fillText(dato.cantidad.toString(), x + barWidth * 0.4, y - 15);
       
+      // Nombre del usuario
       ctx.save();
-      ctx.translate(x + barWidth * 0.4, height - padding + 15);
-      ctx.rotate(-Math.PI / 4);
-      ctx.font = '12px sans-serif';
-      ctx.fillText(dato.nombreUsuario.substring(0, 10), 0, 0);
+      ctx.translate(x + barWidth * 0.4, height - padding + 25);
+      ctx.rotate(-Math.PI / 6);
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(dato.nombreUsuario.substring(0, 15), 0, 0);
       ctx.restore();
     });
 
-    ctx.fillStyle = '#dc143c';
-    ctx.font = 'bold 16px sans-serif';
+    // Título
+    ctx.fillStyle = '#ff1744';
+    ctx.font = 'bold 22px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Publicaciones por Usuario', width / 2, 30);
+    ctx.fillText('Publicaciones por Usuario', width / 2, 35);
 
-    this.chartsRendered.publicaciones = true;
-    console.log('✅ Gráfico de publicaciones renderizado');
+    // Bordes del área de datos
+    ctx.strokeStyle = 'rgba(220, 20, 60, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(padding, padding, width - 2 * padding, height - 2 * padding);
+
+    console.log('✅ Gráfico de publicaciones COMPLETADO');
   }
 
   renderizarGraficoComentariosPeriodo(): void {
-    if (!this.chartComentariosPeriodoRef || this.chartsRendered.comentarios) return;
-    
-    console.log('🎨 Renderizando gráfico de comentarios por periodo...');
     const canvas = this.chartComentariosPeriodoRef.nativeElement;
-    
-    if (!canvas || this.comentariosPorPeriodo.length === 0) {
-      console.warn('⚠️ No se puede renderizar');
-      return;
-    }
-
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const width = canvas.width;
     const height = canvas.height;
-    const padding = 60;
+    const padding = 80;
 
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = 'rgba(10, 10, 10, 0.8)';
+    console.log('🎨 Renderizando comentarios por periodo...');
+    console.log('📊 Datos:', this.comentariosPorPeriodo);
+
+    // Fondo oscuro
+    ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, width, height);
 
     const maxValue = Math.max(...this.comentariosPorPeriodo.map(d => d.cantidad), 1);
     const stepX = (width - 2 * padding) / Math.max(this.comentariosPorPeriodo.length - 1, 1);
 
-    // 🔥 CORRECCIÓN: Dibujar la línea correctamente
+    // Línea principal
     ctx.beginPath();
-    ctx.strokeStyle = '#dc143c';
-    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#ff1744';
+    ctx.lineWidth = 5;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
@@ -284,7 +336,7 @@ export class DashboardEstadisticasComponent implements OnInit, AfterViewInit {
 
     ctx.stroke();
 
-    // Dibujar puntos y valores
+    // Puntos y valores
     this.comentariosPorPeriodo.forEach((dato, index) => {
       const x = padding + index * stepX;
       const y = height - padding - ((dato.cantidad / maxValue) * (height - 2 * padding));
@@ -292,50 +344,46 @@ export class DashboardEstadisticasComponent implements OnInit, AfterViewInit {
       // Punto
       ctx.fillStyle = '#ff1744';
       ctx.beginPath();
-      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.arc(x, y, 10, 0, Math.PI * 2);
       ctx.fill();
 
-      // Borde del punto
+      // Borde blanco
       ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
       ctx.stroke();
 
       // Valor
       ctx.fillStyle = '#fff';
-      ctx.font = 'bold 12px sans-serif';
+      ctx.font = 'bold 18px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(dato.cantidad.toString(), x, y - 15);
+      ctx.fillText(dato.cantidad.toString(), x, y - 25);
 
-      // Fecha (cada 3 puntos para no saturar)
-      if (index % 3 === 0 || index === this.comentariosPorPeriodo.length - 1) {
-        ctx.fillStyle = '#888';
-        ctx.font = '10px sans-serif';
+      // Fecha
+      if (index % 2 === 0 || index === this.comentariosPorPeriodo.length - 1) {
+        ctx.fillStyle = '#aaa';
+        ctx.font = '12px sans-serif';
         const fecha = new Date(dato.fecha);
         const fechaTexto = `${fecha.getDate()}/${fecha.getMonth() + 1}`;
-        ctx.fillText(fechaTexto, x, height - padding + 20);
+        ctx.fillText(fechaTexto, x, height - padding + 30);
       }
     });
 
-    ctx.fillStyle = '#dc143c';
-    ctx.font = 'bold 16px sans-serif';
+    // Título
+    ctx.fillStyle = '#ff1744';
+    ctx.font = 'bold 22px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Comentarios por Periodo', width / 2, 30);
+    ctx.fillText('Comentarios por Periodo', width / 2, 35);
 
-    this.chartsRendered.comentarios = true;
-    console.log('✅ Gráfico de comentarios por periodo renderizado');
+    // Bordes
+    ctx.strokeStyle = 'rgba(220, 20, 60, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(padding, padding, width - 2 * padding, height - 2 * padding);
+
+    console.log('✅ Gráfico de comentarios COMPLETADO');
   }
 
   renderizarGraficoComentariosPublicacion(): void {
-    if (!this.chartComentariosPublicacionRef || this.chartsRendered.publicacionesTop) return;
-    
-    console.log('🎨 Renderizando gráfico de comentarios por publicación...');
     const canvas = this.chartComentariosPublicacionRef.nativeElement;
-    
-    if (!canvas || this.comentariosPorPublicacion.length === 0) {
-      console.warn('⚠️ No se puede renderizar');
-      return;
-    }
-
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -343,18 +391,21 @@ export class DashboardEstadisticasComponent implements OnInit, AfterViewInit {
     const height = canvas.height;
     const centerX = width / 2;
     const centerY = height / 2;
-    const radius = Math.min(width, height) / 2 - 60;
+    const radius = Math.min(width, height) / 2 - 80;
 
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = 'rgba(10, 10, 10, 0.8)';
+    console.log('🎨 Renderizando top publicaciones...');
+    console.log('📊 Datos:', this.comentariosPorPublicacion);
+
+    // Fondo oscuro
+    ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, width, height);
 
     const total = this.comentariosPorPublicacion.reduce((sum, d) => sum + d.cantidad, 0);
     let currentAngle = -Math.PI / 2;
 
     const colors = [
-      '#dc143c', '#ff1744', '#b01030', '#8b0000', '#ff4757',
-      '#c92a2a', '#e03131', '#f03e3e', '#fa5252', '#ff6b6b'
+      '#ff1744', '#dc143c', '#ff4757', '#e03131', '#fa5252',
+      '#c92a2a', '#f03e3e', '#ff6b6b', '#b01030', '#8b0000'
     ];
 
     this.comentariosPorPublicacion.forEach((dato, index) => {
@@ -367,30 +418,41 @@ export class DashboardEstadisticasComponent implements OnInit, AfterViewInit {
       ctx.fillStyle = colors[index % colors.length];
       ctx.fill();
 
-      ctx.strokeStyle = '#1a1a1a';
-      ctx.lineWidth = 2;
+      // Borde entre secciones
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 4;
       ctx.stroke();
 
+      // Porcentaje
       const percentage = ((dato.cantidad / total) * 100).toFixed(1);
       const labelAngle = currentAngle + sliceAngle / 2;
-      const labelX = centerX + Math.cos(labelAngle) * (radius * 0.7);
-      const labelY = centerY + Math.sin(labelAngle) * (radius * 0.7);
+      const labelX = centerX + Math.cos(labelAngle) * (radius * 0.65);
+      const labelY = centerY + Math.sin(labelAngle) * (radius * 0.65);
 
       ctx.fillStyle = '#fff';
-      ctx.font = 'bold 14px sans-serif';
+      ctx.font = 'bold 18px sans-serif';
       ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // Fondo semi-opaco para el texto
+      const textWidth = ctx.measureText(`${percentage}%`).width;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillRect(labelX - textWidth/2 - 5, labelY - 12, textWidth + 10, 24);
+      
+      // Texto
+      ctx.fillStyle = '#fff';
       ctx.fillText(`${percentage}%`, labelX, labelY);
 
       currentAngle += sliceAngle;
     });
 
-    ctx.fillStyle = '#dc143c';
-    ctx.font = 'bold 16px sans-serif';
+    // Título
+    ctx.fillStyle = '#ff1744';
+    ctx.font = 'bold 22px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Top 10 Publicaciones', width / 2, 30);
+    ctx.fillText('Top 10 Publicaciones', width / 2, 35);
 
-    this.chartsRendered.publicacionesTop = true;
-    console.log('✅ Gráfico de comentarios por publicación renderizado');
+    console.log('✅ Gráfico de top publicaciones COMPLETADO');
   }
 
   volver(): void {

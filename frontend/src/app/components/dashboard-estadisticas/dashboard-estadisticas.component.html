@@ -14,7 +14,7 @@
   <div class="filtros-fecha">
     <div class="filtros-content">
       <div class="fecha-group">
-        <label for="fechaInicio">Fecha Inicio:</label>
+        <label for="fechaInicio">Fecha Inicio (opcional):</label>
         <input
           type="date"
           id="fechaInicio"
@@ -23,7 +23,7 @@
       </div>
 
       <div class="fecha-group">
-        <label for="fechaFin">Fecha Fin:</label>
+        <label for="fechaFin">Fecha Fin (opcional):</label>
         <input
           type="date"
           id="fechaFin"
@@ -32,7 +32,7 @@
       </div>
 
       <button class="btn-actualizar" (click)="cargarTodasEstadisticas()">
-        🔄 Actualizar
+        🔄 {{ (fechaInicio && fechaFin) ? 'Filtrar' : 'Mostrar Todo' }}
       </button>
     </div>
   </div>
@@ -86,12 +86,11 @@
           id="chartPublicaciones" 
           width="600" 
           height="400"
-          style="max-width: 100%; height: auto;"
           *ngIf="publicacionesPorUsuario.length > 0"
         ></canvas>
         <div class="sin-datos" *ngIf="publicacionesPorUsuario.length === 0">
           <p>No hay datos disponibles</p>
-          <small>Intenta ajustar el rango de fechas</small>
+          <small>{{ (fechaInicio && fechaFin) ? 'Intenta ajustar el rango de fechas' : 'No hay publicaciones en el sistema' }}</small>
         </div>
       </div>
     </div>
@@ -108,12 +107,11 @@
           id="chartComentariosPeriodo" 
           width="600" 
           height="400"
-          style="max-width: 100%; height: auto;"
           *ngIf="comentariosPorPeriodo.length > 0"
         ></canvas>
         <div class="sin-datos" *ngIf="comentariosPorPeriodo.length === 0">
           <p>No hay datos disponibles</p>
-          <small>Intenta ajustar el rango de fechas</small>
+          <small>{{ (fechaInicio && fechaFin) ? 'Intenta ajustar el rango de fechas' : 'No hay comentarios en el sistema' }}</small>
         </div>
       </div>
     </div>
@@ -132,12 +130,11 @@
             id="chartComentariosPublicacion" 
             width="500" 
             height="500"
-            style="max-width: 100%; height: auto;"
             *ngIf="comentariosPorPublicacion.length > 0"
           ></canvas>
           <div class="sin-datos" *ngIf="comentariosPorPublicacion.length === 0">
             <p>No hay datos disponibles</p>
-            <small>Intenta ajustar el rango de fechas</small>
+            <small>{{ (fechaInicio && fechaFin) ? 'Intenta ajustar el rango de fechas' : 'No hay comentarios en publicaciones' }}</small>
           </div>
         </div>
         

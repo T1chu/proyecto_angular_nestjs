@@ -1,4 +1,4 @@
-// social-network-backend/src/publications/estadisticas.service.ts - CORREGIDO
+// social-network-backend/src/publications/estadisticas.service.ts - DEBUG EXTREMO
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -15,47 +15,52 @@ export class EstadisticasService {
   ) {}
 
   async publicacionesPorUsuario(fechaInicio: string, fechaFin: string) {
-    console.log('📊 === PUBLICACIONES POR USUARIO (CORREGIDO) ===');
-    console.log('Fechas recibidas:', { fechaInicio, fechaFin });
+    console.log('\n\n🔥🔥🔥 === PUBLICACIONES POR USUARIO === 🔥🔥🔥');
+    console.log('📅 Parámetros recibidos:', { fechaInicio, fechaFin });
     
-    // 🔥 CORRECCIÓN: Si no hay fechas, usar rango completo
-    const inicio = fechaInicio ? new Date(fechaInicio) : new Date('2000-01-01');
-    const fin = fechaFin ? new Date(fechaFin) : new Date();
-    
-    // Ajustar inicio al comienzo del día y fin al final del día
-    inicio.setHours(0, 0, 0, 0);
-    fin.setHours(23, 59, 59, 999);
-
-    console.log('📅 Fechas procesadas:', {
-      inicio: inicio.toISOString(),
-      fin: fin.toISOString()
-    });
-
     try {
-      // Debug: Contar todas las publicaciones sin filtro
-      const totalTodasPubs = await this.publicationModel.countDocuments({ activo: true });
-      console.log('📝 Total publicaciones activas (sin filtro de fecha):', totalTodasPubs);
-      
-      // Contar publicaciones en el rango
-      const totalEnRango = await this.publicationModel.countDocuments({
-        createdAt: { $gte: inicio, $lte: fin },
-        activo: true,
+      // 🔥 PASO 1: Contar TODAS las publicaciones sin filtro
+      const todasPublicaciones = await this.publicationModel.find({ activo: true }).lean();
+      console.log('\n📊 TODAS LAS PUBLICACIONES ACTIVAS:', todasPublicaciones.length);
+      todasPublicaciones.forEach((pub: any, i) => {
+        console.log(`   ${i + 1}. "${pub.titulo}" - Fecha: ${pub.createdAt}`);
       });
       
-      console.log('📝 Total publicaciones en rango:', totalEnRango);
+      // 🔥 PASO 2: Construir filtro
+      let filtroFecha: any = { activo: true };
+      
+      if (fechaInicio && fechaFin) {
+        const inicio = new Date(fechaInicio);
+        const fin = new Date(fechaFin);
+        inicio.setHours(0, 0, 0, 0);
+        fin.setHours(23, 59, 59, 999);
+        
+        console.log('\n🔍 APLICANDO FILTRO DE FECHAS:');
+        console.log('   Inicio:', inicio.toISOString());
+        console.log('   Fin:', fin.toISOString());
+        
+        filtroFecha.createdAt = { $gte: inicio, $lte: fin };
+      } else {
+        console.log('\n✅ SIN FILTRO DE FECHAS - Mostrando TODAS');
+      }
+      
+      // 🔥 PASO 3: Contar con filtro
+      const conFiltro = await this.publicationModel.find(filtroFecha).lean();
+      console.log(`\n📊 PUBLICACIONES CON FILTRO: ${conFiltro.length}`);
+      conFiltro.forEach((pub: any, i) => {
+        console.log(`   ${i + 1}. "${pub.titulo}"`);
+      });
 
-      // Si no hay publicaciones en el rango, retornar array vacío
-      if (totalEnRango === 0) {
-        console.log('⚠️ No hay publicaciones en el rango especificado');
+      if (conFiltro.length === 0) {
+        console.log('\n⚠️⚠️⚠️ NO HAY PUBLICACIONES EN EL RANGO ⚠️⚠️⚠️');
         return [];
       }
 
+      // 🔥 PASO 4: Agregación
+      console.log('\n🔄 Ejecutando agregación...');
       const resultado = await this.publicationModel.aggregate([
         {
-          $match: {
-            createdAt: { $gte: inicio, $lte: fin },
-            activo: true,
-          },
+          $match: filtroFecha,
         },
         {
           $group: {
@@ -90,54 +95,48 @@ export class EstadisticasService {
         },
       ]);
 
-      console.log('✅ Resultado agregado:', JSON.stringify(resultado, null, 2));
-      console.log('📊 Total usuarios con publicaciones:', resultado.length);
+      console.log('\n✅✅✅ RESULTADO FINAL ✅✅✅');
+      console.log('Total usuarios con publicaciones:', resultado.length);
+      resultado.forEach((r, i) => {
+        console.log(`   ${i + 1}. ${r.nombreUsuario} (${r.nombre}): ${r.cantidad} publicaciones`);
+      });
+      console.log('🔥🔥🔥 ============================= 🔥🔥🔥\n\n');
       
       return resultado;
     } catch (error) {
-      console.error('❌ Error en publicacionesPorUsuario:', error);
+      console.error('❌❌❌ ERROR FATAL:', error);
       return [];
     }
   }
 
   async comentariosPorPeriodo(fechaInicio: string, fechaFin: string) {
-    console.log('📊 === COMENTARIOS POR PERIODO (CORREGIDO) ===');
-    console.log('Fechas recibidas:', { fechaInicio, fechaFin });
+    console.log('\n\n💬💬💬 === COMENTARIOS POR PERIODO === 💬💬💬');
+    console.log('📅 Parámetros recibidos:', { fechaInicio, fechaFin });
     
-    // 🔥 CORRECCIÓN: Si no hay fechas, usar rango completo
-    const inicio = fechaInicio ? new Date(fechaInicio) : new Date('2000-01-01');
-    const fin = fechaFin ? new Date(fechaFin) : new Date();
-    
-    inicio.setHours(0, 0, 0, 0);
-    fin.setHours(23, 59, 59, 999);
-
-    console.log('📅 Fechas procesadas:', {
-      inicio: inicio.toISOString(),
-      fin: fin.toISOString()
-    });
-
     try {
-      // Debug: Contar todos los comentarios
-      const totalTodosComments = await this.commentModel.countDocuments({});
-      console.log('💬 Total comentarios (sin filtro):', totalTodosComments);
+      const todosComentarios = await this.commentModel.find({}).lean();
+      console.log('\n📊 TODOS LOS COMENTARIOS:', todosComentarios.length);
       
-      // Contar comentarios en el rango
-      const totalEnRango = await this.commentModel.countDocuments({
-        createdAt: { $gte: inicio, $lte: fin },
-      });
+      let filtroFecha: any = {};
       
-      console.log('💬 Total comentarios en rango:', totalEnRango);
-
-      if (totalEnRango === 0) {
-        console.log('⚠️ No hay comentarios en el rango especificado');
-        return [];
+      if (fechaInicio && fechaFin) {
+        const inicio = new Date(fechaInicio);
+        const fin = new Date(fechaFin);
+        inicio.setHours(0, 0, 0, 0);
+        fin.setHours(23, 59, 59, 999);
+        
+        console.log('\n🔍 APLICANDO FILTRO:');
+        console.log('   Inicio:', inicio.toISOString());
+        console.log('   Fin:', fin.toISOString());
+        
+        filtroFecha.createdAt = { $gte: inicio, $lte: fin };
+      } else {
+        console.log('\n✅ SIN FILTRO - Mostrando TODOS');
       }
 
       const resultado = await this.commentModel.aggregate([
         {
-          $match: {
-            createdAt: { $gte: inicio, $lte: fin },
-          },
+          $match: filtroFecha,
         },
         {
           $group: {
@@ -172,49 +171,49 @@ export class EstadisticasService {
         },
       ]);
 
-      console.log('✅ Comentarios por periodo:', JSON.stringify(resultado, null, 2));
-      console.log('📊 Total días con comentarios:', resultado.length);
+      console.log('\n✅✅✅ RESULTADO FINAL ✅✅✅');
+      console.log('Total días con comentarios:', resultado.length);
+      resultado.forEach((r, i) => {
+        const fecha = new Date(r.fecha);
+        console.log(`   ${i + 1}. ${fecha.toLocaleDateString()}: ${r.cantidad} comentarios`);
+      });
+      console.log('💬💬💬 ============================= 💬💬💬\n\n');
       
       return resultado;
     } catch (error) {
-      console.error('❌ Error en comentariosPorPeriodo:', error);
+      console.error('❌❌❌ ERROR FATAL:', error);
       return [];
     }
   }
 
   async comentariosPorPublicacion(fechaInicio: string, fechaFin: string) {
-    console.log('📊 === COMENTARIOS POR PUBLICACIÓN (CORREGIDO) ===');
-    console.log('Fechas recibidas:', { fechaInicio, fechaFin });
+    console.log('\n\n📊📊📊 === COMENTARIOS POR PUBLICACION === 📊📊📊');
+    console.log('📅 Parámetros recibidos:', { fechaInicio, fechaFin });
     
-    // 🔥 CORRECCIÓN: Si no hay fechas, usar rango completo
-    const inicio = fechaInicio ? new Date(fechaInicio) : new Date('2000-01-01');
-    const fin = fechaFin ? new Date(fechaFin) : new Date();
-    
-    inicio.setHours(0, 0, 0, 0);
-    fin.setHours(23, 59, 59, 999);
-
-    console.log('📅 Fechas procesadas:', {
-      inicio: inicio.toISOString(),
-      fin: fin.toISOString()
-    });
-
     try {
-      const totalEnRango = await this.commentModel.countDocuments({
-        createdAt: { $gte: inicio, $lte: fin },
-      });
+      const todosComentarios = await this.commentModel.find({}).lean();
+      console.log('\n📊 TODOS LOS COMENTARIOS:', todosComentarios.length);
       
-      console.log('💬 Total comentarios en rango:', totalEnRango);
-
-      if (totalEnRango === 0) {
-        console.log('⚠️ No hay comentarios en el rango especificado');
-        return [];
+      let filtroFecha: any = {};
+      
+      if (fechaInicio && fechaFin) {
+        const inicio = new Date(fechaInicio);
+        const fin = new Date(fechaFin);
+        inicio.setHours(0, 0, 0, 0);
+        fin.setHours(23, 59, 59, 999);
+        
+        console.log('\n🔍 APLICANDO FILTRO:');
+        console.log('   Inicio:', inicio.toISOString());
+        console.log('   Fin:', fin.toISOString());
+        
+        filtroFecha.createdAt = { $gte: inicio, $lte: fin };
+      } else {
+        console.log('\n✅ SIN FILTRO - Mostrando TODOS');
       }
 
       const resultado = await this.commentModel.aggregate([
         {
-          $match: {
-            createdAt: { $gte: inicio, $lte: fin },
-          },
+          $match: filtroFecha,
         },
         {
           $group: {
@@ -254,12 +253,16 @@ export class EstadisticasService {
         },
       ]);
 
-      console.log('✅ Top 10 publicaciones:', JSON.stringify(resultado, null, 2));
-      console.log('📊 Total publicaciones con comentarios:', resultado.length);
+      console.log('\n✅✅✅ RESULTADO FINAL ✅✅✅');
+      console.log('Total publicaciones en top 10:', resultado.length);
+      resultado.forEach((r, i) => {
+        console.log(`   ${i + 1}. "${r.titulo}": ${r.cantidad} comentarios`);
+      });
+      console.log('📊📊📊 ============================= 📊📊📊\n\n');
       
       return resultado;
     } catch (error) {
-      console.error('❌ Error en comentariosPorPublicacion:', error);
+      console.error('❌❌❌ ERROR FATAL:', error);
       return [];
     }
   }
