@@ -48,7 +48,7 @@ export class AuthController {
             false,
           );
         }
-        
+
         console.log('✅ Archivo aceptado');
         cb(null, true);
       },
@@ -58,7 +58,7 @@ export class AuthController {
     }),
   )
   async registro(
-    @Body() body: any, // Cambiamos a any porque viene como FormData
+    @Body() body: any, 
     @UploadedFile() file: Express.Multer.File,
   ) {
     console.log('📝 Body recibido:', body);
