@@ -7,15 +7,14 @@
       </button>
       
       <div class="perfil-avatar">
-        <img 
+        <img
+          class="avatar-img"
+          [class.loading]="cargando"
           [src]="usuario.imagenPerfil 
             ? environment.api + '/uploads/perfiles/' + usuario.imagenPerfil 
             : '/assets/default-avatar.png'"
           [alt]="usuario.nombre"
-          class="avatar-img"
-          [class.loading]="cargando"
-        >
-        
+        />
         <div *ngIf="cargando" class="loading-overlay">
           <div class="spinner-upload"></div>
         </div>
@@ -89,8 +88,9 @@
 
               <div *ngIf="pub.imagen" class="mini-pub-imagen">
                 <img 
-                  [src]="environment.api + '/uploads/publicaciones/' + pub.imagen"
-                  [alt]="pub.titulo">
+                [src]="environment.api + '/uploads/publicaciones/' + pub.imagen"
+                [alt]="pub.titulo"
+                />
               </div>
 
               <div class="mini-pub-stats">

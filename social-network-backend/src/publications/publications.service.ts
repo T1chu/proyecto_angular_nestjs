@@ -23,13 +23,15 @@ export class PublicationsService {
   async crear(createPublicationDto: CreatePublicationDto, file: Express.Multer.File, usuarioId: string) {
     const nuevaPublicacion = new this.publicationModel({
       ...createPublicationDto,
-      imagen: file ? `/uploads/publicaciones/${file.filename}` : null,
+      imagen: file ? file.filename : null,   // ← SOLO EL NOMBRE
       usuario: usuarioId,
     });
 
     const publicacion = await nuevaPublicacion.save();
     return await publicacion.populate('usuario', '-contrasena');
   }
+
+
 
   async obtenerPorId(id: string) {
     const publicacion = await this.publicationModel

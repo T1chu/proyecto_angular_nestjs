@@ -70,34 +70,32 @@ export class UsersService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
+    // borrar la anterior
     if (usuario.imagenPerfil) {
-      const nombreArchivo = usuario.imagenPerfil.split('/').pop();
-      if (nombreArchivo) {
-        const imagenAnterior = path.join(
-          __dirname,
-          '..',
-          '..',
-          'uploads',
-          'perfiles',
-          nombreArchivo,
-        );
-        if (fs.existsSync(imagenAnterior)) {
-          try {
-            fs.unlinkSync(imagenAnterior);
-          } catch (error) {
-            console.error('Error al eliminar imagen anterior:', error);
-          }
-        }
+      const imagenAnterior = path.join(
+        __dirname,
+        '..',
+        '..',
+        'uploads',
+        'perfiles',
+        usuario.imagenPerfil // ← YA ES SOLO EL FILENAME
+      );
+
+      if (fs.existsSync(imagenAnterior)) {
+        try { fs.unlinkSync(imagenAnterior); } catch {}
       }
     }
 
-    usuario.imagenPerfil = `/uploads/perfiles/${file.filename}`;
+    // guardar SOLO EL NOMBRE DEL ARCHIVO
+    usuario.imagenPerfil = file.filename;
+
     await usuario.save();
 
     return {
       imagenPerfil: usuario.imagenPerfil,
     };
   }
+
 
   // ===== MÉTODOS DE ADMINISTRACIÓN =====
 
@@ -128,7 +126,7 @@ export class UsersService {
       correo,
       nombreUsuario,
       contrasena: hashedPassword,
-      imagenPerfil: file ? `/uploads/perfiles/${file.filename}` : null,
+      imagenPerfil: file ? file.filename : null,
     });
 
     await nuevoUsuario.save();
