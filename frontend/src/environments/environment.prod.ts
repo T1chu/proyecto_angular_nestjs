@@ -1,5 +1,5 @@
-// frontend/src/environments/environment.prod.ts
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:3000/api'
+  api: 'https://proyecto-angular-nestjs-1.onrender.com',
+  uploads: 'https://proyecto-angular-nestjs-1.onrender.com/uploads/'
 };

@@ -26,44 +26,5 @@
         ]
       }
     }
-  ],
-  "dataGroups": [
-    {
-      "name": "api-publicaciones",
-      "urls": [
-        "http://localhost:3000/publicaciones",
-        "http://localhost:3000/publicaciones/**"
-      ],
-      "cacheConfig": {
-        "strategy": "freshness",
-        "maxSize": 50,
-        "maxAge": "1h",
-        "timeout": "5s"
-      }
-    },
-    {
-      "name": "api-usuarios",
-      "urls": [
-        "http://localhost:3000/usuarios/**",
-        "http://localhost:3000/auth/**"
-      ],
-      "cacheConfig": {
-        "strategy": "freshness",
-        "maxSize": 20,
-        "maxAge": "30m",
-        "timeout": "5s"
-      }
-    },
-    {
-      "name": "imagenes",
-      "urls": [
-        "http://localhost:3000/uploads/**"
-      ],
-      "cacheConfig": {
-        "strategy": "performance",
-        "maxSize": 100,
-        "maxAge": "7d"
-      }
-    }
   ]
 }

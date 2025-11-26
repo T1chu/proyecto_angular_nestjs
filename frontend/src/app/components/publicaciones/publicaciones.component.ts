@@ -1,4 +1,4 @@
-// frontend/src/app/components/publicaciones/publicaciones.component.ts (ACTUALIZADO)
+// frontend/src/app/components/publicaciones/publicaciones.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,12 +8,15 @@ import { AuthService } from '../../services/auth.service';
 import { ModalCrearPublicacionComponent } from '../modal-crear-publicacion/modal-crear-publicacion.component';
 import { RoleAccessDirective } from '../../directives/role-access.directive';
 
+// 🔥 IMPORTANTE: importar environment
+import { environment } from '../../../environments/environment.prod';
+
 @Component({
   selector: 'app-publicaciones',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
+    CommonModule,
+    FormsModule,
     ModalCrearPublicacionComponent,
     RoleAccessDirective
   ],
@@ -21,6 +24,7 @@ import { RoleAccessDirective } from '../../directives/role-access.directive';
   styleUrls: ['./publicaciones.component.css']
 })
 export class PublicacionesComponent implements OnInit {
+
   publicaciones: Publicacion[] = [];
   loading: boolean = true;
   mostrarModal: boolean = false;
@@ -28,6 +32,10 @@ export class PublicacionesComponent implements OnInit {
   offset: number = 0;
   limit: number = 10;
   total: number = 0;
+
+  // Exponer environment al HTML
+  environment = environment;
+
   Math = Math;
 
   constructor(
@@ -44,7 +52,7 @@ export class PublicacionesComponent implements OnInit {
 
   cargarPublicaciones(): void {
     this.loading = true;
-    
+
     this.publicationsService.listar(this.ordenamiento, this.offset, this.limit).subscribe({
       next: (response: any) => {
         if (response && response.publicaciones) {
@@ -57,7 +65,7 @@ export class PublicacionesComponent implements OnInit {
           this.publicaciones = [];
           this.total = 0;
         }
-        
+
         this.loading = false;
       },
       error: (error: any) => {
@@ -103,8 +111,8 @@ export class PublicacionesComponent implements OnInit {
     if (!usuarioActual || !publicacion || !publicacion.usuario) {
       return false;
     }
-    // Puede eliminar si es su publicación O si es administrador
-    return usuarioActual._id === publicacion.usuario._id || 
+
+    return usuarioActual._id === publicacion.usuario._id ||
            usuarioActual.perfil === 'administrador';
   }
 
@@ -114,9 +122,7 @@ export class PublicacionesComponent implements OnInit {
     }
 
     this.publicationsService.eliminar(id).subscribe({
-      next: () => {
-        this.cargarPublicaciones();
-      },
+      next: () => this.cargarPublicaciones(),
       error: (error: any) => {
         console.error('❌ Error al eliminar publicación:', error);
         alert('Error al eliminar la publicación');
@@ -125,79 +131,58 @@ export class PublicacionesComponent implements OnInit {
   }
 
   yaDioMeGusta(publicacion: Publicacion): boolean {
-  const usuarioActual = this.authService.getUsuarioActual();
-  if (!usuarioActual || !publicacion || !publicacion.meGusta) {
-    return false;
-  }
-  
-  const usuarioIdString = String(usuarioActual._id);
-  const resultado = publicacion.meGusta.some(id => String(id) === usuarioIdString);
-  
-  console.log('🔍 Verificando me gusta:', {
-    usuarioId: usuarioIdString,
-    meGusta: publicacion.meGusta,
-    yaDioMeGusta: resultado
-  });
-  
-  return resultado;
-}
-
-toggleMeGusta(publicacion: Publicacion): void {
-  if (!publicacion) return;
-  
-  console.log('💗 Toggle me gusta en publicación:', publicacion._id);
-  console.log('❤️ Ya dio me gusta:', this.yaDioMeGusta(publicacion));
-  
-  if (this.yaDioMeGusta(publicacion)) {
-    console.log('➡️ Quitando me gusta...');
-    this.quitarMeGusta(publicacion);
-  } else {
-    console.log('➡️ Dando me gusta...');
-    this.darMeGusta(publicacion);
-  }
-}
-
-darMeGusta(publicacion: Publicacion): void {
-  if (!publicacion || !publicacion._id) return;
-  
-  console.log('❤️ Dando me gusta a:', publicacion._id);
-  
-  this.publicationsService.darMeGusta(publicacion._id).subscribe({
-    next: (pubActualizada: Publicacion) => {
-      console.log('✅ Me gusta agregado. Nuevos me gustas:', pubActualizada.meGusta);
-      const index = this.publicaciones.findIndex(p => p._id === publicacion._id);
-      if (index !== -1 && pubActualizada && pubActualizada.meGusta) {
-        this.publicaciones[index].meGusta = pubActualizada.meGusta;
-        console.log('✅ Lista actualizada en componente');
-      }
-    },
-    error: (error: any) => {
-      console.error('❌ Error al dar me gusta:', error);
-      alert(error.error?.message || 'Error al dar me gusta');
+    const usuarioActual = this.authService.getUsuarioActual();
+    if (!usuarioActual || !publicacion || !publicacion.meGusta) {
+      return false;
     }
-  });
-}
 
-quitarMeGusta(publicacion: Publicacion): void {
-  if (!publicacion || !publicacion._id) return;
-  
-  console.log('💔 Quitando me gusta de:', publicacion._id);
-  
-  this.publicationsService.quitarMeGusta(publicacion._id).subscribe({
-    next: (pubActualizada: Publicacion) => {
-      console.log('✅ Me gusta quitado. Nuevos me gustas:', pubActualizada.meGusta);
-      const index = this.publicaciones.findIndex(p => p._id === publicacion._id);
-      if (index !== -1 && pubActualizada && pubActualizada.meGusta) {
-        this.publicaciones[index].meGusta = pubActualizada.meGusta;
-        console.log('✅ Lista actualizada en componente');
-      }
-    },
-    error: (error: any) => {
-      console.error('❌ Error al quitar me gusta:', error);
-      alert(error.error?.message || 'Error al quitar me gusta');
+    const usuarioIdString = String(usuarioActual._id);
+    return publicacion.meGusta.some(id => String(id) === usuarioIdString);
+  }
+
+  toggleMeGusta(publicacion: Publicacion): void {
+    if (!publicacion) return;
+
+    if (this.yaDioMeGusta(publicacion)) {
+      this.quitarMeGusta(publicacion);
+    } else {
+      this.darMeGusta(publicacion);
     }
-  });
-}
+  }
+
+  darMeGusta(publicacion: Publicacion): void {
+    if (!publicacion._id) return;
+
+    this.publicationsService.darMeGusta(publicacion._id).subscribe({
+      next: (pubActualizada: Publicacion) => {
+        const index = this.publicaciones.findIndex(p => p._id === publicacion._id);
+        if (index !== -1 && pubActualizada.meGusta) {
+          this.publicaciones[index].meGusta = pubActualizada.meGusta;
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error al dar me gusta:', error);
+        alert(error.error?.message || 'Error al dar me gusta');
+      }
+    });
+  }
+
+  quitarMeGusta(publicacion: Publicacion): void {
+    if (!publicacion._id) return;
+
+    this.publicationsService.quitarMeGusta(publicacion._id).subscribe({
+      next: (pubActualizada: Publicacion) => {
+        const index = this.publicaciones.findIndex(p => p._id === publicacion._id);
+        if (index !== -1 && pubActualizada.meGusta) {
+          this.publicaciones[index].meGusta = pubActualizada.meGusta;
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error al quitar me gusta:', error);
+        alert(error.error?.message || 'Error al quitar me gusta');
+      }
+    });
+  }
 
   paginaAnterior(): void {
     if (this.offset > 0) {

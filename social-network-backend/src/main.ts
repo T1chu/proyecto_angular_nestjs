@@ -44,7 +44,13 @@ async function bootstrap() {
 
   // Habilitar CORS
   app.enableCors({
-    origin: ['http://localhost:4200', 'http://localhost:3000'],
+    origin: [
+      'http://localhost:4200',
+      'http://localhost:3000',
+      'https://proyectoparcial2nestjs-190ae.web.app',
+      'https://proyectoparcial2nestjs-190ae.firebaseapp.com',
+      process.env.FRONTEND_URL, // por si querés setearlo en Render
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

@@ -17,7 +17,7 @@ bootstrapApplication(AppComponent, {
     ),
     importProvidersFrom(FormsModule, ReactiveFormsModule),
     provideServiceWorker('ngsw-worker.js', {
-      enabled: !isDevMode(),
+      enabled: true, // ← FORZAR habilitado para producción
       registrationStrategy: 'registerWhenStable:30000'
     })
   ]

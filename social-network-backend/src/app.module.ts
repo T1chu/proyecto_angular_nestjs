@@ -14,21 +14,26 @@ import { PublicationsModule } from './publications/publications.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
     MongooseModule.forRoot(
       process.env.MONGODB_URI || 'mongodb://localhost:27017/redsocial',
     ),
+
+    // 🔥 FIX REAL PARA RENDER
+    // Ahora Render puede servir /uploads/... correctamente
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
       serveStaticOptions: {
         index: false,
         redirect: false,
       },
     }),
+
     MulterModule.register({
       dest: './uploads',
     }),
-    // NO registrar JwtModule aquí, ya está en AuthModule como global
+
     AuthModule,
     UsersModule,
     PublicationsModule,

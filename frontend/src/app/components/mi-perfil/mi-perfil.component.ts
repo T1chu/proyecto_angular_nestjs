@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, Usuario } from '../../services/auth.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.prod';
 
 interface Publicacion {
   _id: string;
@@ -25,13 +25,17 @@ interface Publicacion {
   styleUrls: ['./mi-perfil.component.css'],
 })
 export class MiPerfilComponent implements OnInit {
+  
+  // 🔥 Exponer environment al template
+  environment = environment;
+
   usuario: Usuario | null = null;
   publicaciones: Publicacion[] = [];
   editando: boolean = false;
   cargando: boolean = false;
   error: string = '';
   mensajeExito: string = '';
-  
+
   // Campos editables
   nombre: string = '';
   apellido: string = '';
@@ -65,7 +69,7 @@ export class MiPerfilComponent implements OnInit {
       'Authorization': `Bearer ${token}`
     });
 
-    this.http.get<any>(`${environment.apiUrl}/usuarios/perfil`, { headers })
+    this.http.get<any>(`${environment.api}/usuarios/perfil`, { headers })
       .subscribe({
         next: (response) => {
           if (response.publicaciones) {
@@ -84,7 +88,7 @@ export class MiPerfilComponent implements OnInit {
 
     const archivo = input.files[0];
 
-    // Validar tipo de archivo
+    // Validaciones
     if (!archivo.type.match(/^image\/(jpg|jpeg|png|gif)$/)) {
       this.error = 'Solo se permiten imágenes (JPG, PNG, GIF)';
       setTimeout(() => this.error = '', 3000);
@@ -92,7 +96,6 @@ export class MiPerfilComponent implements OnInit {
       return;
     }
 
-    // Validar tamaño (máximo 5MB)
     if (archivo.size > 5 * 1024 * 1024) {
       this.error = 'La imagen no debe superar 5MB';
       setTimeout(() => this.error = '', 3000);
@@ -113,7 +116,7 @@ export class MiPerfilComponent implements OnInit {
 
     try {
       const response = await this.http.put<any>(
-        `${environment.apiUrl}/usuarios/perfil/imagen`,
+        `${environment.api}/usuarios/perfil/imagen`,
         formData,
         { headers }
       ).toPromise();
@@ -135,13 +138,12 @@ export class MiPerfilComponent implements OnInit {
   }
 
   toggleEdicion() {
-    if (this.editando) {
-      if (this.usuario) {
-        this.nombre = this.usuario.nombre;
-        this.apellido = this.usuario.apellido || '';
-        this.descripcion = this.usuario.descripcion || '';
-      }
+    if (this.editando && this.usuario) {
+      this.nombre = this.usuario.nombre;
+      this.apellido = this.usuario.apellido || '';
+      this.descripcion = this.usuario.descripcion || '';
     }
+    
     this.editando = !this.editando;
     this.error = '';
     this.mensajeExito = '';
@@ -170,7 +172,7 @@ export class MiPerfilComponent implements OnInit {
     };
 
     this.http.put<any>(
-      `${environment.apiUrl}/usuarios/perfil`,
+      `${environment.api}/usuarios/perfil`,
       datos,
       { headers }
     ).subscribe({
