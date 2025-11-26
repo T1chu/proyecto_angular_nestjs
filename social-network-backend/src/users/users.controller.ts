@@ -1,4 +1,4 @@
-// social-network-backend/src/users/users.controller.ts (ACTUALIZADO)
+// social-network-backend/src/users/users.controller.ts
 import {
   Controller,
   Get,
@@ -13,21 +13,31 @@ import {
   UploadedFile,
   BadRequestException,
 } from '@nestjs/common';
+
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+
 import { UsersService } from './users.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
 import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 
 interface RequestWithUser {
-  user: {
-    sub: string;
-    perfil: string;
-    nombreUsuario: string;
-  };
+  user: { sub: string; perfil: string; nombreUsuario: string };
 }
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// COMPATIBLE CON TU VERSIÓN (params vacío)
+const storagePerfil = new CloudinaryStorage({
+  cloudinary,
+  params: {},
+});
 
 @Controller('usuarios')
 @UseGuards(AuthGuard)
@@ -48,36 +58,15 @@ export class UsersController {
   }
 
   @Put('perfil/imagen')
-  @UseInterceptors(
-    FileInterceptor('imagenPerfil', {
-      storage: diskStorage({
-        destination: './uploads/perfiles',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `perfil-${uniqueSuffix}${ext}`);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-          return cb(
-            new BadRequestException('Solo se permiten imágenes'),
-            false,
-          );
-        }
-        cb(null, true);
-      },
-    }),
-  )
+  @UseInterceptors(FileInterceptor('imagenPerfil', { storage: storagePerfil }))
   async actualizarImagenPerfil(
     @Req() req: RequestWithUser,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
   ) {
-    if (!file) {
-      throw new BadRequestException('No se proporcionó ninguna imagen');
-    }
-    return this.usersService.actualizarImagenPerfil(req.user.sub, file);
+    if (!file) throw new BadRequestException('No se subió ninguna imagen');
+
+    // versión vieja → usar URL
+    return this.usersService.actualizarImagenPerfil(req.user.sub, file.url);
   }
 
   @Get(':id')
@@ -85,7 +74,7 @@ export class UsersController {
     return this.usersService.obtenerPerfil(id);
   }
 
-  // ===== RUTAS DE ADMINISTRACIÓN =====
+  // ADMIN ====
 
   @Get()
   @UseGuards(AdminGuard)
@@ -95,34 +84,10 @@ export class UsersController {
 
   @Post()
   @UseGuards(AdminGuard)
-  @UseInterceptors(
-    FileInterceptor('imagenPerfil', {
-      storage: diskStorage({
-        destination: './uploads/perfiles',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `perfil-${uniqueSuffix}${ext}`);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-          return cb(
-            new BadRequestException('Solo se permiten imágenes'),
-            false,
-          );
-        }
-        cb(null, true);
-      },
-      limits: {
-        fileSize: 5 * 1024 * 1024,
-      },
-    }),
-  )
+  @UseInterceptors(FileInterceptor('imagenPerfil', { storage: storagePerfil }))
   async crearUsuario(
     @Body() createAdminUserDto: CreateAdminUserDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
   ) {
     return this.usersService.crearUsuario(createAdminUserDto, file);
   }

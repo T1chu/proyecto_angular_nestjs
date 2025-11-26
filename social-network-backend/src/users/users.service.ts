@@ -78,7 +78,7 @@ export class UsersService {
         '..',
         'uploads',
         'perfiles',
-        usuario.imagenPerfil // ← YA ES SOLO EL FILENAME
+        usuario.imagenPerfil, // ← YA ES SOLO EL FILENAME
       );
 
       if (fs.existsSync(imagenAnterior)) {

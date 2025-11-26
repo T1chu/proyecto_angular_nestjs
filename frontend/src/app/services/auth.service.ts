@@ -1,4 +1,3 @@
-// frontend/src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, firstValueFrom } from 'rxjs';
@@ -38,16 +37,14 @@ export interface ValidarTokenResponse {
   providedIn: 'root'
 })
 export class AuthService {
+
   private apiUrl = environment.apiUrl;
   private usuarioActual = new BehaviorSubject<Usuario | null>(null);
   public usuario$ = this.usuarioActual.asObservable();
   private inicializado = false;
 
-  constructor(private http: HttpClient) {
-    // No llamar a cargarUsuarioDesdeToken aquí para evitar dependencia circular
-  }
+  constructor(private http: HttpClient) {}
 
-  // Método público para inicializar el servicio
   inicializar(): void {
     if (!this.inicializado) {
       this.inicializado = true;
@@ -124,7 +121,7 @@ export class AuthService {
             headers: { 'Authorization': `Bearer ${token}` }
           })
         );
-        
+
         if (response?.usuario) {
           this.usuarioActual.next(response.usuario);
         }
@@ -156,7 +153,9 @@ export class AuthService {
         this.usuarioActual.next(response.usuario);
         return true;
       }
+
       return false;
+
     } catch (error) {
       console.error('Error al refrescar token:', error);
       this.logout();

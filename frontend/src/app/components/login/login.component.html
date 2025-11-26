@@ -39,7 +39,7 @@
 
       <button
         type="submit"
-        [disabled]="loginForm.invalid || cargando"
+        [disabled]="cargando"
         class="btn-primary"
       >
         {{ cargando ? 'Iniciando sesión...' : 'Iniciar Sesión' }}

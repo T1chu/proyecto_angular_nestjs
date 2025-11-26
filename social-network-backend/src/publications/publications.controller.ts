@@ -15,9 +15,11 @@ import {
   HttpCode,
   BadRequestException,
 } from '@nestjs/common';
+
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
+
 import { PublicationsService } from './publications.service';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -25,12 +27,20 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { AuthGuard } from '../auth/auth.guard';
 
 interface RequestWithUser {
-  user: {
-    sub: string;
-    perfil: string;
-    nombreUsuario: string;
-  };
+  user: { sub: string; perfil: string; nombreUsuario: string };
 }
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Storage compatible con TU versión
+const storagePublicaciones = new CloudinaryStorage({
+  cloudinary,
+  params: {},
+});
 
 @Controller('publicaciones')
 @UseGuards(AuthGuard)
@@ -38,43 +48,32 @@ export class PublicationsController {
   constructor(private readonly publicationsService: PublicationsService) {}
 
   @Post()
-  @UseInterceptors(
-    FileInterceptor('imagen', {
-      storage: diskStorage({
-        destination: './uploads/publicaciones',
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `pub-${uniqueSuffix}${ext}`);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-          return cb(new BadRequestException('Solo se permiten imágenes'), false);
-        }
-        cb(null, true);
-      },
-      limits: {
-        fileSize: 5 * 1024 * 1024,
-      },
-    }),
-  )
+  @UseInterceptors(FileInterceptor('imagen', { storage: storagePublicaciones }))
   async crear(
     @Body() createPublicationDto: CreatePublicationDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Req() req: RequestWithUser,
   ) {
-    return this.publicationsService.crear(createPublicationDto, file, req.user.sub);
+    return this.publicationsService.crear(
+      createPublicationDto,
+      file?.url || null,
+      req.user.sub,
+    );
   }
 
   @Get()
   async listar(
-    @Query('ordenamiento') ordenamiento: string = 'fecha',
+    @Query('ordenamiento') ordenamiento = 'fecha',
     @Query('usuario') usuario: string,
-    @Query('offset') offset: number = 0,
-    @Query('limit') limit: number = 10,
+    @Query('offset') offset = 0,
+    @Query('limit') limit = 10,
   ) {
-    return this.publicationsService.listar(ordenamiento, usuario, Number(offset), Number(limit));
+    return this.publicationsService.listar(
+      ordenamiento,
+      usuario,
+      Number(offset),
+      Number(limit),
+    );
   }
 
   @Get(':id')
@@ -102,10 +101,14 @@ export class PublicationsController {
   @Get(':id/comentarios')
   async obtenerComentarios(
     @Param('id') id: string,
-    @Query('offset') offset: number = 0,
-    @Query('limit') limit: number = 10,
+    @Query('offset') offset = 0,
+    @Query('limit') limit = 10,
   ) {
-    return this.publicationsService.obtenerComentarios(id, Number(offset), Number(limit));
+    return this.publicationsService.obtenerComentarios(
+      id,
+      Number(offset),
+      Number(limit),
+    );
   }
 
   @Post(':id/comentarios')
@@ -114,7 +117,11 @@ export class PublicationsController {
     @Body() createCommentDto: CreateCommentDto,
     @Req() req: RequestWithUser,
   ) {
-    return this.publicationsService.crearComentario(id, createCommentDto, req.user.sub);
+    return this.publicationsService.crearComentario(
+      id,
+      createCommentDto,
+      req.user.sub,
+    );
   }
 
   @Put(':id/comentarios/:comentarioId')
@@ -124,7 +131,11 @@ export class PublicationsController {
     @Body() updateCommentDto: UpdateCommentDto,
     @Req() req: RequestWithUser,
   ) {
-    return this.publicationsService.modificarComentario(comentarioId, updateCommentDto, req.user.sub);
+    return this.publicationsService.modificarComentario(
+      comentarioId,
+      updateCommentDto,
+      req.user.sub,
+    );
   }
 
   @Delete(':id/comentarios/:comentarioId')
@@ -134,6 +145,10 @@ export class PublicationsController {
     @Param('comentarioId') comentarioId: string,
     @Req() req: RequestWithUser,
   ) {
-    return this.publicationsService.eliminarComentario(comentarioId, req.user.sub, req.user.perfil);
+    return this.publicationsService.eliminarComentario(
+      comentarioId,
+      req.user.sub,
+      req.user.perfil,
+    );
   }
 }
