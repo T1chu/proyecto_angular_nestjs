@@ -1,0 +1,104 @@
+{
+  "configVersion": 1,
+  "timestamp": 1764116885100,
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/index.html",
+        "/main.0dfd20feee8f283a.js",
+        "/polyfills.4dd287cddb16609f.js",
+        "/runtime.4de9540a593ba35c.js",
+        "/styles.e4a807690468aa88.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "api-publicaciones",
+      "patterns": [
+        "http:\\/\\/localhost:3000\\/publicaciones",
+        "http:\\/\\/localhost:3000\\/publicaciones\\/.*"
+      ],
+      "strategy": "freshness",
+      "maxSize": 50,
+      "maxAge": 3600000,
+      "timeoutMs": 5000,
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "version": 1
+    },
+    {
+      "name": "api-usuarios",
+      "patterns": [
+        "http:\\/\\/localhost:3000\\/usuarios\\/.*",
+        "http:\\/\\/localhost:3000\\/auth\\/.*"
+      ],
+      "strategy": "freshness",
+      "maxSize": 20,
+      "maxAge": 1800000,
+      "timeoutMs": 5000,
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "version": 1
+    },
+    {
+      "name": "imagenes",
+      "patterns": [
+        "http:\\/\\/localhost:3000\\/uploads\\/.*"
+      ],
+      "strategy": "performance",
+      "maxSize": 100,
+      "maxAge": 604800000,
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "version": 1
+    }
+  ],
+  "hashTable": {
+    "/index.html": "9b4cce2d3fa3d92f3cbf095c558aa7480b8145f0",
+    "/main.0dfd20feee8f283a.js": "0ed07f732095cb564a621cb1852bfc3355236160",
+    "/polyfills.4dd287cddb16609f.js": "3b82ad6eb78ccc6fb319e8518d76da5fde587589",
+    "/runtime.4de9540a593ba35c.js": "28387f223ec147537d035684c04d0938002e1805",
+    "/styles.e4a807690468aa88.css": "422f88d4f42756843407d1ef17f665560e88ef17"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}
